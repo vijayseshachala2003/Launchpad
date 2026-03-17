@@ -1,0 +1,5 @@
+{
+  "section_2_script": "scripts/judge_section2.py",
+  "section_3_script": "scripts/judge_section3.py",
+  "python": "python3"
+}
