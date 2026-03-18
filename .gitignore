@@ -1,6 +1,7 @@
-.env
 .venv/
 __pycache__/
 *.pyc
-scripts/*.csv
-scripts/*.json
+.DS_Store
+backend/.env
+backend/scripts/*.csv
+backend/scripts/*.json

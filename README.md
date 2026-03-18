@@ -1,28 +1,45 @@
-# Launchpad Eval — Section 2 & 3
+# Launchpad Eval
 
-All code lives in this single folder. Web UI to run the judge pipelines for **Section 2** and **Section 3**; you can run both sections at once (parallel, multi-threaded).
+```
+Launchpad-eval/
+├── frontend/                 # Static UI only → see frontend/README.md
+│   ├── index.html
+│   └── README.md
+├── backend/                  # API, pipeline, judges → see backend/README.md
+│   ├── server.py
+│   ├── ingest_api.py
+│   ├── pipeline_runner.py
+│   ├── config.json
+│   ├── requirements.txt
+│   ├── .env
+│   └── scripts/
+│       ├── judge_section2.py
+│       ├── judge_section3.py
+│       ├── ingest_cli.py              # optional CLI ingest
+│       └── evaluate_from_supabase.py  # dev stub (fake scores)
+└── README.md
+```
 
-## Setup
-
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Create `.env` in this folder with `OPENAI_API_KEY=your_key` (used by the judge scripts when run from the server).
-
-3. `config.json` points to `scripts/judge_section2.py` and `scripts/judge_section3.py` by default. Set `python` to your interpreter (e.g. `python3`) if needed.
-
-## Run
-
-From this directory:
+## Quick start
 
 ```bash
+cd backend
+pip install -r requirements.txt
+# Create .env with OPENAI_API_KEY and SUPABASE_DB_*
 python server.py
 ```
 
-Then open **http://127.0.0.1:5050** in your browser.
+Open **http://127.0.0.1:5050** for the pipeline UI.
 
-- **Section 2** and **Section 3** each have their own file input, max rows, and **Run** button.
-- You can run both at the same time; the server handles concurrent requests (threaded). Judge scripts use their own worker threads internally.
-- Input/output files are written under `scripts/` as `section_N_YYYY-MM-DD_HH-MM-SS.csv` and `..._output.csv` (and `.json`).
+## Date range & timezone (GMT)
+
+Data is in **GMT**. Leave the timezone as **GMT (UTC)** in the UI (or set `PIPELINE_TIMEZONE=UTC` or `PIPELINE_TIMEZONE=GMT` in `.env`). From/to are wall times in that zone; the server converts to UTC for Soul + Supabase.
+
+## Manual ingest (CLI)
+
+```bash
+cd backend
+python scripts/ingest_cli.py --timezone GMT --from 2025-01-01T00:00:00 --to 2025-12-31T23:59:59
+```
+
+Omit `--from` / `--to` to pull all rows matching the base Soul query. `--timezone` defaults to `PIPELINE_TIMEZONE` or GMT/UTC.
