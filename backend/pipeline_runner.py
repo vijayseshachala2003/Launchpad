@@ -19,7 +19,6 @@ from psycopg2.extras import RealDictCursor
 
 from ingest_api import get_postgres_config
 
-# Eval status enum: PENDING | IN_PROGRESS | SUCCESS | FAILED | SKIPPED
 UPDATE_SEC2 = """
 UPDATE new_evaluation_table SET
     sec_2_judge_model = %s,
@@ -30,9 +29,7 @@ UPDATE new_evaluation_table SET
     sec_2_articulation_score = %s,
     sec_2_articulation_justification = %s,
     sec_2_comprehension_score = %s,
-    sec_2_comprehension_justification = %s,
-    sec_2_evaluated_at = %s,
-    sec_2_eval_status = %s
+    sec_2_comprehension_justification = %s
 WHERE uniqueid = %s
 """
 
@@ -44,25 +41,8 @@ UPDATE new_evaluation_table SET
     sec3_evaluation_score = %s,
     sec3_evaluation_justification = %s,
     sec3_articulation_score = %s,
-    sec3_articulation_justification = %s,
-    sec_3_evaluated_at = %s,
-    sec_3_eval_status = %s
+    sec3_articulation_justification = %s
 WHERE uniqueid = %s
-"""
-
-UPDATE_EVAL_STATUS_FAILED_SEC2 = """
-UPDATE new_evaluation_table SET sec_2_eval_status = 'FAILED'
-WHERE uniqueid = ANY(%s)
-"""
-UPDATE_EVAL_STATUS_FAILED_SEC3 = """
-UPDATE new_evaluation_table SET sec_3_eval_status = 'FAILED'
-WHERE uniqueid = ANY(%s)
-"""
-UPDATE_EVAL_STATUS_IN_PROGRESS = """
-UPDATE new_evaluation_table SET
-    sec_2_eval_status = 'IN_PROGRESS',
-    sec_3_eval_status = 'IN_PROGRESS'
-WHERE uniqueid = ANY(%s)
 """
 
 
@@ -74,7 +54,7 @@ def fetch_rows_for_range(
     sql = """
     SELECT
         uniqueid,
-        soul_id,
+        email,
         initialvalue_prompt,
         initialvalue_ai_response,
         section_2_instruction,
@@ -164,28 +144,10 @@ def _read_judged_csv(path: Path) -> List[Dict[str, str]]:
         return list(csv.DictReader(f))
 
 
-def _now_utc_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
-
-
-def _mark_eval_in_progress(uniqueids: List[str]) -> None:
-    if not uniqueids:
-        return
-    conn = psycopg2.connect(**get_postgres_config())
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(UPDATE_EVAL_STATUS_IN_PROGRESS, (uniqueids,))
-    finally:
-        conn.close()
-
-
 def apply_section2_scores(csv_path: Path) -> int:
     rows = _read_judged_csv(csv_path)
     conn = psycopg2.connect(**get_postgres_config())
     n = 0
-    evaluated_at = _now_utc_iso()
-    status = "SUCCESS"
     try:
         with conn:
             with conn.cursor() as cur:
@@ -205,8 +167,6 @@ def apply_section2_scores(csv_path: Path) -> int:
                             r.get("articulation_justification") or "",
                             str(r.get("comprehension_score") or ""),
                             r.get("comprehension_justification") or "",
-                            evaluated_at,
-                            status,
                             uid,
                         ),
                     )
@@ -220,8 +180,6 @@ def apply_section3_scores(csv_path: Path) -> int:
     rows = _read_judged_csv(csv_path)
     conn = psycopg2.connect(**get_postgres_config())
     n = 0
-    evaluated_at = _now_utc_iso()
-    status = "SUCCESS"
     try:
         with conn:
             with conn.cursor() as cur:
@@ -239,26 +197,11 @@ def apply_section3_scores(csv_path: Path) -> int:
                             r.get("evaluation_justification") or "",
                             str(r.get("articulation_score") or ""),
                             r.get("articulation_justification") or "",
-                            evaluated_at,
-                            status,
                             uid,
                         ),
                     )
                     n += cur.rowcount
         return n
-    finally:
-        conn.close()
-
-
-def _mark_section_failed(uniqueids: List[str], section: str) -> None:
-    if not uniqueids:
-        return
-    sql = UPDATE_EVAL_STATUS_FAILED_SEC2 if section == "sec2" else UPDATE_EVAL_STATUS_FAILED_SEC3
-    conn = psycopg2.connect(**get_postgres_config())
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(sql, (uniqueids,))
     finally:
         conn.close()
 
@@ -366,12 +309,6 @@ def run_pipeline_events(
     write_section2_csv(db_rows, sec2_in)
     write_section3_csv(db_rows, sec3_in)
 
-    uniqueids = [str(r.get("uniqueid") or "").strip() for r in db_rows if (r.get("uniqueid") or "").strip()]
-    try:
-        _mark_eval_in_progress(uniqueids)
-    except Exception as e:
-        yield {"type": "log", "message": f"Warning: could not set IN_PROGRESS status: {e}"}
-
     judge2 = (backend_dir / "scripts" / "judge_section2.py").resolve()
     judge3 = (backend_dir / "scripts" / "judge_section3.py").resolve()
     env = os.environ.copy()
@@ -442,7 +379,6 @@ def run_pipeline_events(
         n2 = apply_section2_scores(sec2_out)
         yield {"type": "log", "message": f"Updated {n2} rows (Section 2 columns)."}
     except Exception as e:
-        _mark_section_failed(uniqueids, "sec2")
         yield {"type": "error", "message": f"Section 2 DB update failed: {e}"}
         return
 
@@ -451,7 +387,6 @@ def run_pipeline_events(
         n3 = apply_section3_scores(sec3_out)
         yield {"type": "log", "message": f"Updated {n3} rows (Section 3 columns)."}
     except Exception as e:
-        _mark_section_failed(uniqueids, "sec3")
         yield {"type": "error", "message": f"Section 3 DB update failed: {e}"}
         return
 

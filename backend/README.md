@@ -18,7 +18,6 @@
 | `judge_section2.py`      | Section 2 LLM judge |
 | `judge_section3.py`      | Section 3 LLM judge |
 | `ingest_cli.py`          | CLI ingest (`python scripts/ingest_cli.py --from … --to …`) |
-| `evaluate_from_supabase.py` | Dev stub that fills score columns (not real judges) |
 
 Run the server from **this directory**:
 

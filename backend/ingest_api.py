@@ -16,7 +16,7 @@ from psycopg2.extras import execute_values
 API_ENDPOINT = "https://reporting.soulhq.ai/read-query/execute"
 SOURCE = "Python ETL"
 
-# Same stages as Metabase; keep in sync everywhere (see test.py).
+# Same stages as Metabase; keep in sync with reporting queries.
 STAGE_IDS_SQL = """(
     'stc_260218173538143LSI2M',
     'stc_26020219454705910Z9Z',
@@ -267,12 +267,10 @@ def run_ingest(date_from: str | None, date_to: str | None) -> int:
                 cur.execute(CREATE_STAGING_SQL)
                 execute_values(cur, INSERT_STAGING_SQL, values, page_size=200)
                 cur.execute(DELETE_STAGING_DUPLICATE_CREATED_EMAIL_SQL)
-                skipped = cur.rowcount
                 cur.execute(UPDATE_FROM_STAGING_SQL)
                 cur.execute(INSERT_NEW_SQL)
                 cur.execute("SELECT COUNT(*) FROM _launchpad_ingest")
                 n_applied = cur.fetchone()[0]
-        # Rows that reached UPDATE/INSERT after removing (created_at, email) duplicates.
-        return n_applied if skipped is not None else len(values)
+        return n_applied
     finally:
         conn.close()

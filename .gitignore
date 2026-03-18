@@ -1,7 +1,9 @@
 .venv/
 __pycache__/
+**/__pycache__/
 *.pyc
 .DS_Store
 backend/.env
 backend/scripts/*.csv
 backend/scripts/*.json
+*.code-workspace

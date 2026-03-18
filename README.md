@@ -15,8 +15,7 @@ Launchpad-eval/
 │   └── scripts/
 │       ├── judge_section2.py
 │       ├── judge_section3.py
-│       ├── ingest_cli.py              # optional CLI ingest
-│       └── evaluate_from_supabase.py  # dev stub (fake scores)
+│       └── ingest_cli.py              # optional CLI ingest
 └── README.md
 ```
 
@@ -43,3 +42,7 @@ python scripts/ingest_cli.py --timezone GMT --from 2025-01-01T00:00:00 --to 2025
 ```
 
 Omit `--from` / `--to` to pull all rows matching the base Soul query. `--timezone` defaults to `PIPELINE_TIMEZONE` or GMT/UTC.
+
+## Git (uncommit / untrack)
+
+See **[docs/GIT_CLEANUP.md](docs/GIT_CLEANUP.md)** for commands to uncommit or stop tracking files.
