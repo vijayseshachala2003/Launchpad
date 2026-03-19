@@ -10,6 +10,8 @@ Express server: serves the React app and runs the pipeline (ingest from Soul API
 
 Loads **`backend/.env`** so `OPENAI_API_KEY` and Supabase vars are available (for spawned Python judges and for Node DB/ingest).
 
+**CORS:** By default allows `https://teamdeccanrm.in` and localhost. Override with `APP_ORIGIN` (comma-separated list) in env if needed.
+
 Run from repo root:
 
 ```bash

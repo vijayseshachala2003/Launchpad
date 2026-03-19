@@ -14,8 +14,18 @@ const FRONTEND_FALLBACK = path.join(REPO_ROOT, 'frontend');
 
 dotenv.config({ path: path.join(REPO_ROOT, 'backend', '.env') });
 
+// Production app URL (used for CORS). Override with APP_ORIGIN for multiple origins.
+const APP_ORIGIN = process.env.APP_ORIGIN
+  ? process.env.APP_ORIGIN.split(',').map((o) => o.trim())
+  : ['https://teamdeccanrm.in', 'http://localhost:5173', 'http://127.0.0.1:5173'];
+
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: APP_ORIGIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const staticDir = existsSync(path.join(FRONTEND_DIST, 'index.html'))
