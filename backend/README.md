@@ -1,27 +1,24 @@
-# Backend
+# Backend (Python judge scripts + env)
 
-| File / folder        | Purpose |
-|---------------------|---------|
-| `server.py`         | Flask app: `/`, `/api/pipeline`, `/api/run` |
-| `ingest_api.py`     | Read-only Soul reporting API → Supabase upsert |
-| `pipeline_runner.py`| Export CSVs → judges → write scores; sets `sec_2/3_evaluated_at`, `sec_2/3_eval_status` (PENDING \| IN_PROGRESS \| SUCCESS \| FAILED \| SKIPPED) |
-| `config.json`       | Judge script paths, Python executable |
-| `requirements.txt`  | Dependencies |
-| `.env`              | Secrets + optional `PIPELINE_TIMEZONE` (default GMT/UTC; data is in GMT) |
-| `datetime_tz.py`    | Wall time in selected TZ (default GMT) → UTC for Soul + Supabase |
-| **`scripts/`**      | See below |
+The **Node server** (`../server/`) runs the API and pipeline; it loads `.env` from here and invokes the judge scripts in `scripts/`.
+
+| Path | Purpose |
+|------|---------|
+| `.env` | `OPENAI_API_KEY`, `SUPABASE_*`, optional `PIPELINE_TIMEZONE` (default GMT/UTC) |
+| `requirements.txt` | Python deps for judge scripts only (`openai`, `python-dotenv`) |
+| **`scripts/`** | See below |
 
 ## `scripts/`
 
-| File                     | Purpose |
-|--------------------------|---------|
-| `judge_section2.py`      | Section 2 LLM judge |
-| `judge_section3.py`      | Section 3 LLM judge |
-| `ingest_cli.py`          | CLI ingest (`python scripts/ingest_cli.py --from … --to …`) |
+| File | Purpose |
+|------|---------|
+| `judge_section2.py` | Section 2 LLM judge (invoked by Node pipeline) |
+| `judge_section3.py` | Section 3 LLM judge (invoked by Node pipeline) |
 
-Run the server from **this directory**:
+Install deps only if you run the judges directly (e.g. for testing):
 
 ```bash
 pip install -r requirements.txt
-python server.py
 ```
+
+Otherwise the Node server runs the pipeline and calls these scripts with the right env.
