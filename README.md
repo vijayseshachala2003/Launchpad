@@ -139,7 +139,3 @@ Runs at **http://0.0.0.0:5050** (or set `PORT` / `HOST` in env). Loads `backend/
 Data is stored in **GMT/UTC**. In the UI, keep timezone as **GMT (UTC)** (or set `PIPELINE_TIMEZONE=UTC` in `backend/.env`). From/to are interpreted as wall time in that zone; the server converts them to UTC for the Soul API and Supabase so filtering matches Metabase and other GMT-based reports.
 
 ---
-
-## Git (uncommit / untrack)
-
-See **[docs/GIT_CLEANUP.md](docs/GIT_CLEANUP.md)** for commands to uncommit or stop tracking files.
