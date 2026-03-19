@@ -7,3 +7,7 @@ backend/.env
 backend/scripts/*.csv
 backend/scripts/*.json
 *.code-workspace
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+server/node_modules/

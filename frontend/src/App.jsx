@@ -64,8 +64,9 @@ export default function App() {
     setProgS2({ current: 0, total: 0 })
     setProgS3({ current: 0, total: 0 })
 
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
     try {
-      const res = await fetch('/api/pipeline', {
+      const res = await fetch(`${apiBase}/api/pipeline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
