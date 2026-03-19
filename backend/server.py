@@ -21,7 +21,8 @@ from pipeline_runner import run_pipeline_events
 
 BACKEND_DIR = Path(__file__).resolve().parent
 REPO_ROOT = BACKEND_DIR.parent
-FRONTEND_DIR = REPO_ROOT / "frontend"
+_FRONTEND_BUILD = REPO_ROOT / "frontend" / "dist"
+FRONTEND_DIR = _FRONTEND_BUILD if _FRONTEND_BUILD.exists() else REPO_ROOT / "frontend"
 
 # Load .env from backend/ so OPENAI_API_KEY is available for judge subprocesses
 load_dotenv(BACKEND_DIR / ".env")
