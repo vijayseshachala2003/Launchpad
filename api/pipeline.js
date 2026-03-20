@@ -1,13 +1,16 @@
 import { spawn } from 'child_process';
 import { mkdir, writeFile, readFile } from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { getPostgresConfig, fetchRowsForRange } from './db.js';
 import { runIngest } from './ingest.js';
 import pg from 'pg';
 
 const { Client } = pg;
 
-const BACKEND_DIR = path.resolve(process.cwd(), 'backend');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, '..');
+const BACKEND_DIR = path.join(REPO_ROOT, 'backend');
 const SCRIPTS_DIR = path.join(BACKEND_DIR, 'scripts');
 
 const UPDATE_SEC2 = `

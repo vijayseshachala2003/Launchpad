@@ -10,4 +10,4 @@ backend/scripts/*.json
 frontend/node_modules/
 frontend/dist/
 frontend/.env
-server/node_modules/
+api/node_modules/

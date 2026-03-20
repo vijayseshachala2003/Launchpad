@@ -1,6 +1,6 @@
 # Backend (Python judge scripts + env)
 
-The **Node server** (`../server/`) runs the API and pipeline; it loads `.env` from here and invokes the judge scripts in `scripts/`.
+The **Node API** (`../api/`) runs the HTTP server and pipeline; it loads `.env` from here and invokes the judge scripts in `scripts/`.
 
 | Path | Purpose |
 |------|---------|
@@ -21,4 +21,4 @@ Install deps only if you run the judges directly (e.g. for testing):
 pip install -r requirements.txt
 ```
 
-Otherwise the Node server runs the pipeline and calls these scripts with the right env.
+Otherwise the Node process in `api/` runs the pipeline and calls these scripts with the right env.
