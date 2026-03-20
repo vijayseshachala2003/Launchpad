@@ -183,6 +183,10 @@ export async function runIngest(dateFrom, dateTo) {
   const client = new Client(getPostgresConfig());
   await client.connect();
   try {
+    // CREATE TEMP ... ON COMMIT DROP removes the table when that transaction ends.
+    // node-pg commits each standalone query by default, so without BEGIN/COMMIT the
+    // temp table was dropped after CREATE_STAGING and INSERT failed.
+    await client.query('BEGIN');
     await client.query(CREATE_STAGING);
     for (let i = 0; i < values.length; i += 200) {
       const chunk = values.slice(i, i + 200);
@@ -202,7 +206,16 @@ export async function runIngest(dateFrom, dateTo) {
     await client.query(UPDATE_FROM_STAGING);
     await client.query(INSERT_NEW);
     const countRes = await client.query('SELECT COUNT(*) AS n FROM _launchpad_ingest');
-    return parseInt(countRes.rows[0].n, 10);
+    const n = parseInt(countRes.rows[0].n, 10);
+    await client.query('COMMIT');
+    return n;
+  } catch (e) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
+    throw e;
   } finally {
     await client.end();
   }
