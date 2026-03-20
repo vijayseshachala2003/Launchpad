@@ -187,3 +187,52 @@ button:disabled {
   margin: 0.35rem 0 0 0;
   line-height: 1.35;
 }
+
+.download-section {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.download-section h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 0.5rem 0;
+}
+
+.download-section p {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin: 0 0 0.65rem 0;
+  line-height: 1.35;
+}
+
+.download-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.download-buttons button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.download-buttons button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.download-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

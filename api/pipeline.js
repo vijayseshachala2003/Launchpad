@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getPostgresConfig, fetchRowsForRange } from './db.js';
 import { runIngest } from './ingest.js';
+import { registerPipelineExports } from './csvExportRegistry.js';
 import pg from 'pg';
 
 const { Client } = pg;
@@ -194,11 +195,12 @@ function runJudgeStream(cmd, cwd, env, label, onLine) {
  * @param {number} opts.maxRows
  * @param {string} opts.pythonCmd
  * @param {boolean} opts.skipIngest
+ * @param {boolean} [opts.downloadCsv] - register short-lived token so browser can download CSVs + summary JSON
  * @param {(ev: object) => void} [send] - called for judge stdout (progress/log) so they can stream
- * @returns {AsyncGenerator<{ type: string; message?: string; section?: string; current?: number; total?: number; rows_evaluated?: number; sec2_output?: string; sec3_output?: string }>}
+ * @returns {AsyncGenerator<{ type: string; message?: string; section?: string; current?: number; total?: number; rows_evaluated?: number; sec2_output?: string; sec3_output?: string; csv_download_token?: string }>}
  */
 export async function* runPipelineEvents(opts, send = () => {}) {
-  const { dateFrom, dateTo, maxRows, pythonCmd, skipIngest } = opts;
+  const { dateFrom, dateTo, maxRows, pythonCmd, skipIngest, downloadCsv } = opts;
 
   yield { type: 'log', message: 'Starting pipeline…' };
 
@@ -335,10 +337,35 @@ export async function* runPipelineEvents(opts, send = () => {}) {
     return;
   }
 
+  let csv_download_token;
+  if (downloadCsv) {
+    const summary = JSON.stringify(
+      {
+        run_at: new Date().toISOString(),
+        date_from_utc: dateFrom,
+        date_to_utc: dateTo,
+        rows_evaluated: dbRows.length,
+        files: {
+          section2_input: path.basename(sec2In),
+          section3_input: path.basename(sec3In),
+          section2_output: path.basename(sec2Out),
+          section3_output: path.basename(sec3Out),
+        },
+      },
+      null,
+      2
+    );
+    csv_download_token = registerPipelineExports(
+      SCRIPTS_DIR,
+      { sec2In, sec3In, sec2Out, sec3Out, summary },
+    );
+  }
+
   yield {
     type: 'done',
     rows_evaluated: dbRows.length,
     sec2_output: sec2Out,
     sec3_output: sec3Out,
+    ...(csv_download_token && { csv_download_token }),
   };
 }

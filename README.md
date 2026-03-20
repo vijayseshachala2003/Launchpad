@@ -81,6 +81,7 @@ Launchpad-eval/
 │   ├── ingest.js             # Soul API client + Supabase upsert
 │   ├── db.js                 # Postgres config + fetchRowsForRange
 │   ├── datetimeTz.js         # Wall time → UTC conversion
+│   ├── csvExportRegistry.js  # Short-lived tokens for browser CSV/JSON downloads
 │   └── package.json
 ├── backend/                  # Python judges + shared config (no HTTP server)
 │   ├── .env                  # OPENAI_API_KEY, SUPABASE_*, PIPELINE_TIMEZONE, etc.
@@ -125,6 +126,10 @@ Runs at **http://0.0.0.0:5050** (or set `PORT` / `HOST` in env). Loads `backend/
   cd ../api && npm start
   ```
   Open **http://127.0.0.1:5050** (or your host).
+
+### Pipeline CSV / JSON downloads
+
+With **“enable browser downloads”** checked (default), a successful run registers a short-lived token. The UI shows buttons to download Section 2/3 **input and judge output CSVs** plus a small **JSON run summary**. Files are still written under `backend/scripts/` for the judges; downloads use `GET /api/pipeline/export/:token/:which` (token expires in about an hour; in-memory store, so use one API instance or accept that tokens may not work behind multiple load-balanced nodes without sticky sessions).
 
 ---
 

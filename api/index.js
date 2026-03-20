@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { wallToUtcIso, expandUtcEndInclusive } from './datetimeTz.js';
 import { runPipelineEvents } from './pipeline.js';
+import { serveExport } from './csvExportRegistry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -35,6 +36,18 @@ app.use(express.static(staticDir));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(staticDir, 'index.html'));
+});
+
+/** Short-lived downloads for pipeline CSVs + run summary JSON (token from SSE `done` event). */
+app.get('/api/pipeline/export/:token/:which', async (req, res) => {
+  const { token, which } = req.params;
+  const result = await serveExport(token, which);
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+  res.setHeader('Content-Type', result.contentType);
+  res.setHeader('Content-Disposition', result.disposition);
+  res.send(result.body);
 });
 
 app.post('/api/pipeline', async (req, res) => {
@@ -67,6 +80,7 @@ app.post('/api/pipeline', async (req, res) => {
   let maxRows = parseInt(data.max_rows, 10);
   if (Number.isNaN(maxRows)) maxRows = 0;
   const skipIngest = Boolean(data.skip_ingest);
+  const downloadCsv = Boolean(data.download_csv);
 
   const pythonCmd = process.env.PIPELINE_PYTHON || 'python3';
 
@@ -88,6 +102,7 @@ app.post('/api/pipeline', async (req, res) => {
         maxRows,
         pythonCmd,
         skipIngest,
+        downloadCsv,
       },
       send
     )) {

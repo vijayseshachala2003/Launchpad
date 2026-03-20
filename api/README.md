@@ -2,7 +2,8 @@
 
 Express app: serves the React app and runs the pipeline (ingest from Soul API → Supabase, fetch rows, run Section 2 & 3 Python judges in parallel, write scores back).
 
-- **`index.js`** — Express app, static files, `POST /api/pipeline` (SSE).
+- **`index.js`** — Express app, static files, `POST /api/pipeline` (SSE), `GET /api/pipeline/export/:token/:which` (CSV/JSON downloads after a run).
+- **`csvExportRegistry.js`** — Short-lived tokens for pipeline file downloads.
 - **`pipeline.js`** — Pipeline flow; spawns `backend/scripts/judge_section2.py` and `judge_section3.py`.
 - **`ingest.js`** — Soul API client + Supabase upsert (with created_at+email guard).
 - **`db.js`** — Postgres/Supabase config and `fetchRowsForRange`.

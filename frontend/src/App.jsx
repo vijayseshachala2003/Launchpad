@@ -24,12 +24,46 @@ function expandEndOfDayMinutes(iso) {
   return iso
 }
 
+const EXPORT_PARTS = [
+  { which: 'section2-input', label: 'Section 2 input (.csv)' },
+  { which: 'section3-input', label: 'Section 3 input (.csv)' },
+  { which: 'section2-output', label: 'Section 2 judge output (.csv)' },
+  { which: 'section3-output', label: 'Section 3 judge output (.csv)' },
+  { which: 'summary', label: 'Run summary (.json)' },
+]
+
+async function downloadExport(apiBase, token, which, fallbackName) {
+  const base = (apiBase || '').replace(/\/$/, '')
+  const url = `${base}/api/pipeline/export/${token}/${which}`
+  const res = await fetch(url, { credentials: 'include' })
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}))
+    throw new Error(j.error || res.statusText)
+  }
+  const blob = await res.blob()
+  const cd = res.headers.get('Content-Disposition')
+  let name = fallbackName
+  const m = cd && cd.match(/filename="?([^";]+)"?/)
+  if (m) name = m[1]
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = name
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(a.href)
+}
+
 export default function App() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [timezone, setTimezone] = useState('UTC')
   const [maxRows, setMaxRows] = useState(50)
   const [skipIngest, setSkipIngest] = useState(false)
+  const [downloadCsv, setDownloadCsv] = useState(true)
+  const [csvToken, setCsvToken] = useState(null)
+  const [downloadBusy, setDownloadBusy] = useState(null)
   const [logLines, setLogLines] = useState([])
   const [progS2, setProgS2] = useState({ current: 0, total: 0 })
   const [progS3, setProgS3] = useState({ current: 0, total: 0 })
@@ -38,6 +72,7 @@ export default function App() {
   const [running, setRunning] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
   const logRef = useRef(null)
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
@@ -59,12 +94,12 @@ export default function App() {
     setRunning(true)
     setStatus('Running…')
     setStatusClass('')
+    setCsvToken(null)
     setLogLines([])
     setShowProgress(true)
     setProgS2({ current: 0, total: 0 })
     setProgS3({ current: 0, total: 0 })
 
-    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
     try {
       const res = await fetch(`${apiBase}/api/pipeline`, {
         method: 'POST',
@@ -75,6 +110,7 @@ export default function App() {
           timezone,
           max_rows: Number.isNaN(maxRows) ? 0 : maxRows,
           skip_ingest: skipIngest,
+          download_csv: downloadCsv,
         }),
       })
 
@@ -113,9 +149,16 @@ export default function App() {
               setStatusClass('err')
             } else if (ev.type === 'done') {
               gotDone = true
-              appendLog(
-                `Done. Rows: ${ev.rows_evaluated}. Outputs: ${ev.sec2_output || ''} | ${ev.sec3_output || ''}`
-              )
+              if (ev.csv_download_token) {
+                setCsvToken(ev.csv_download_token)
+                appendLog(
+                  `Done. Rows: ${ev.rows_evaluated}. Use the download buttons below for CSV/JSON files (links expire in ~1 hour).`
+                )
+              } else {
+                appendLog(
+                  `Done. Rows: ${ev.rows_evaluated}. Server paths: ${ev.sec2_output || ''} | ${ev.sec3_output || ''}`
+                )
+              }
               if (!failed) {
                 setStatus('Pipeline finished. Supabase updated.')
                 setStatusClass('ok')
@@ -212,11 +255,55 @@ export default function App() {
             Skip ingest — only read from Supabase and judge (rows already in DB)
           </label>
         </div>
+        <div className="field checkbox-row">
+          <input
+            id="download-csv"
+            type="checkbox"
+            checked={downloadCsv}
+            onChange={(e) => setDownloadCsv(e.target.checked)}
+          />
+          <label htmlFor="download-csv" style={{ margin: 0 }}>
+            After a successful run, enable browser downloads for pipeline CSVs and a JSON run summary
+          </label>
+        </div>
 
         <button type="button" onClick={runPipeline} disabled={running}>
           Run pipeline
         </button>
         <p className={`status ${statusClass}`}>{status}</p>
+
+        {csvToken && (
+          <div className="download-section">
+            <h3>Download pipeline files</h3>
+            <p>
+              Judge inputs/outputs and a small JSON summary. Same files also remain on the server under{' '}
+              <code>backend/scripts/</code> for debugging.
+            </p>
+            <div className="download-buttons">
+              {EXPORT_PARTS.map(({ which, label }) => (
+                <button
+                  key={which}
+                  type="button"
+                  disabled={downloadBusy === which}
+                  onClick={async () => {
+                    setDownloadBusy(which)
+                    try {
+                      const fallback =
+                        which === 'summary' ? 'pipeline-run-summary.json' : `${which}.csv`
+                      await downloadExport(apiBase, csvToken, which, fallback)
+                    } catch (e) {
+                      appendLog(`Download failed (${which}): ${e.message}`)
+                    } finally {
+                      setDownloadBusy(null)
+                    }
+                  }}
+                >
+                  {downloadBusy === which ? '…' : label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {showProgress && (
           <div className="progress-row">
