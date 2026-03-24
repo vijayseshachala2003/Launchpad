@@ -94,7 +94,11 @@ export default function AssessmentEvaluation() {
     try {
       const res = await fetch(`${apiBase}/api/pipeline`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
         body: JSON.stringify({
           date_from: from,
           date_to: to,
@@ -180,10 +184,11 @@ export default function AssessmentEvaluation() {
       <div className="container">
         <h1 id="assessment-heading">Assessment Evaluation</h1>
         <p className="subtitle">
-          <strong>1.</strong> Ingest from Soul API into Supabase (optional skip).<br />
+          <strong>1.</strong> Server queries Soul for your date range; inserts only rows whose <code>uniqueid</code> is not
+          already in <code>new_evaluation_table</code> (existing rows unchanged by ingest). Optional skip Soul step.<br />
           <strong>2.</strong> Load rows in the time range, run <strong>Section 2</strong> and{' '}
-          <strong>Section 3</strong> judges <strong>in parallel</strong> (multi-threaded).<br />
-          <strong>3.</strong> Write scores to <code>new_evaluation_table</code>.
+          <strong>Section 3</strong> judges <strong>in parallel</strong>.<br />
+          <strong>3.</strong> Write judge scores back to <code>new_evaluation_table</code>.
         </p>
 
         <div className="card">
@@ -235,7 +240,7 @@ export default function AssessmentEvaluation() {
               onChange={(e) => setSkipIngest(e.target.checked)}
             />
             <label htmlFor="skip-ingest" style={{ margin: 0 }}>
-              Skip ingest — only read from Supabase and judge (rows already in DB)
+              Skip Soul ingest — use existing rows in <code>new_evaluation_table</code> only
             </label>
           </div>
           <div className="field checkbox-row">
