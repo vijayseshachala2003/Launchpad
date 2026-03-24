@@ -1,3 +1,3 @@
-# For judge scripts only (invoked by Node in api/). Node runs the API and ingest.
+# For judge scripts only (invoked by Node in server/). Node runs the API and ingest.
 openai>=1.0.0
 python-dotenv>=1.0.0

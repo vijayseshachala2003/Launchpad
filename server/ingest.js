@@ -1,3 +1,8 @@
+/**
+ * Launchpad assessment ingest — same policy as `ingestJudge.js` / `runJudgeIngest`:
+ * always query Soul for the UTC range; stage rows; drop rows whose key already exists in Supabase
+ * (`uniqueid` here, `subtask_id` for judge); insert new rows only (no overwrite). Judge scripts update scores.
+ */
 import fetch from 'node-fetch';
 import pg from 'pg';
 import { getPostgresConfig } from './db.js';
@@ -137,47 +142,39 @@ CREATE TEMP TABLE _launchpad_ingest (
 ) ON COMMIT DROP;
 `;
 
-const DELETE_DUPLICATES = `
+/** Drop Soul rows that already exist in DB (by uniqueid) or have no key — no overwrite of existing rows. */
+const DELETE_ALREADY_IN_DB = `
 DELETE FROM _launchpad_ingest AS i
-WHERE EXISTS (
-  SELECT 1 FROM new_evaluation_table AS t
-  WHERE t.created_at IS NOT DISTINCT FROM i.created_at AND t.email IS NOT DISTINCT FROM i.email
-);
-`;
-
-const UPDATE_FROM_STAGING = `
-UPDATE new_evaluation_table AS t SET
-  created_at = i.created_at, email = i.email, initialvalue_passage = i.initialvalue_passage,
-  initialvalue_question_1 = i.initialvalue_question_1, ans_1 = i.ans_1,
-  initialvalue_question_2 = i.initialvalue_question_2, ans_2 = i.ans_2,
-  initialvalue_question_3 = i.initialvalue_question_3, ans_3 = i.ans_3,
-  initialvalue_question_4 = i.initialvalue_question_4, ans_4 = i.ans_4,
-  initialvalue_question_5 = i.initialvalue_question_5, ans_5 = i.ans_5,
-  initialvalue_prompt = i.initialvalue_prompt, initialvalue_ai_response = i.initialvalue_ai_response,
-  section_2_instruction = i.section_2_instruction, task_1 = i.task_1, task_1_response = i.task_1_response,
-  task_2 = i.task_2, task_2_response = i.task_2_response, task_3 = i.task_3, task_3_response = i.task_3_response,
-  initialvalue_scenario = i.initialvalue_scenario, initialvalue_sec_3_qn = i.initialvalue_sec_3_qn,
-  section_3_instruction = i.section_3_instruction, sec_3_ans = i.sec_3_ans,
-  sec_2_eval_status = 'PENDING', sec_3_eval_status = 'PENDING'
-FROM _launchpad_ingest AS i WHERE t.uniqueid = i.uniqueid;
+WHERE COALESCE(btrim(i.uniqueid), '') = ''
+   OR EXISTS (
+     SELECT 1 FROM new_evaluation_table AS t
+     WHERE t.uniqueid IS NOT DISTINCT FROM i.uniqueid
+   );
 `;
 
 const INSERT_NEW = `
 INSERT INTO new_evaluation_table (${INGEST_COLS}, sec_2_eval_status, sec_3_eval_status)
 SELECT ${INGEST_COLS}, 'PENDING', 'PENDING'
 FROM _launchpad_ingest AS i
-WHERE NOT EXISTS (SELECT 1 FROM new_evaluation_table AS t WHERE t.uniqueid = i.uniqueid);
+WHERE NOT EXISTS (
+  SELECT 1 FROM new_evaluation_table AS t WHERE t.uniqueid IS NOT DISTINCT FROM i.uniqueid
+);
 `;
 
 /**
+ * Always queries Soul for the range, then inserts only rows whose uniqueid is not already in new_evaluation_table.
+ * Does not update existing rows (judge score columns remain untouched until Python judges run).
+ *
  * @param {string|null} dateFrom - UTC ISO
  * @param {string|null} dateTo - UTC ISO
- * @returns {Promise<number>} rows applied (after duplicate guard)
+ * @returns {Promise<{ soul_rows_fetched: number, skipped_existing: number, rows_inserted: number }>}
  */
 export async function runIngest(dateFrom, dateTo) {
   const query = buildQuery(dateFrom, dateTo);
   const apiRows = await fetchApiRows(query);
-  if (!apiRows.length) return 0;
+  if (!apiRows.length) {
+    return { soul_rows_fetched: 0, skipped_existing: 0, rows_inserted: 0 };
+  }
 
   const values = apiRows.map(toRow);
   const client = new Client(getPostgresConfig());
@@ -202,13 +199,17 @@ export async function runIngest(dateFrom, dateTo) {
         flat
       );
     }
-    await client.query(DELETE_DUPLICATES);
-    await client.query(UPDATE_FROM_STAGING);
-    await client.query(INSERT_NEW);
-    const countRes = await client.query('SELECT COUNT(*) AS n FROM _launchpad_ingest');
-    const n = parseInt(countRes.rows[0].n, 10);
+    await client.query(DELETE_ALREADY_IN_DB);
+    const eligibleRes = await client.query('SELECT COUNT(*)::bigint AS n FROM _launchpad_ingest');
+    const eligible = Number(eligibleRes.rows[0].n);
+    const insertRes = await client.query(INSERT_NEW);
+    const inserted = insertRes.rowCount ?? 0;
     await client.query('COMMIT');
-    return n;
+    return {
+      soul_rows_fetched: apiRows.length,
+      skipped_existing: apiRows.length - eligible,
+      rows_inserted: inserted,
+    };
   } catch (e) {
     try {
       await client.query('ROLLBACK');

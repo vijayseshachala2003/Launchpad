@@ -1,0 +1,19 @@
+# Annotator Evaluation Pipeline Requirements
+
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+tqdm>=4.65.0
+
+# Document parsing
+PyMuPDF>=1.23.0
+python-docx>=0.8.11
+python-dotenv>=1.0.0
+
+# Visualization (optional)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# LLM Providers (install at least one)
+google-generativeai>=0.3.0
+together>=1.0.0 

@@ -1,6 +1,96 @@
 # Launchpad Eval
 
-Web app to run **LLM judges** (Section 2 and Section 3) on annotation data: pull data by date range, optionally ingest from a read-only Soul API into Supabase, run judges in parallel, and write scores back to Supabase. **React** UI in `frontend/`; **Node.js** API and pipeline in **`api/`**; **Python** judges and shared **`.env`** in **`backend/`**.
+Monorepo with **three top-level program areas**:
+
+| Folder | Role |
+|--------|------|
+| **`frontend/`** | **Client** — React (Vite) UI in the browser. |
+| **`server/`** | **Server** — Node.js + Express: HTTP API, static files, pipeline orchestration, Soul ingest, Postgres, spawns Python. |
+| **`backend/`** | **Backend workers & data** — Python judge scripts for Launchpad, shared `backend/.env`, and an optional **annotator-judge** CLI subproject. |
+
+Soul API → Supabase → Section 2 & 3 LLM judges; Assessment Evaluation uses **fixed GMT/UTC** for date ranges.
+
+---
+
+## Repository layout (tree)
+
+```
+Launchpad-eval/
+├── frontend/                 # React app (browser)
+├── server/                   # Node.js Express API + pipeline
+├── backend/                  # Python: judges + env + optional annotator-judge toolkit
+│   ├── .env                  # Shared secrets (Launchpad + paths server reads)
+│   ├── requirements.txt
+│   ├── README.md
+│   ├── scripts/              # Launchpad Section 2 & 3 judges
+│   │   ├── judge_section2.py
+│   │   └── judge_section3.py
+│   └── annotator-judge/      # Optional: M1/M2/M3 annotator-vs-golden CLI
+│       ├── main.py
+│       ├── batch_evaluate.py
+│       ├── src/
+│       ├── requirements.txt
+│       └── README.md
+├── README.md                 # This file
+└── .gitignore
+```
+
+---
+
+## File map by folder
+
+### `frontend/` — client (browser)
+
+| Path | Purpose |
+|------|---------|
+| `index.html` | Vite HTML entry |
+| `package.json` | npm scripts: `dev`, `build` |
+| `vite.config.js` | Dev server; proxies **`/api`** → `http://127.0.0.1:5050` (HTTP routes stay under `/api/...`; folder name `server/` is unrelated) |
+| `.env` / `.env.example` | Optional `VITE_API_BASE_URL` |
+| `src/main.jsx` | React bootstrap |
+| `src/App.jsx` | Shell: tabs **Assessment Evaluation** vs **Annotator Judge** |
+| `src/AssessmentEvaluation.jsx` | Launchpad pipeline UI (dates, run, SSE, CSV downloads) |
+| `src/AnnotatorJudgePanel.jsx` | Help text for `backend/annotator-judge/` |
+| `src/index.css` | Styles |
+| `README.md` | Frontend notes |
+
+**Dev:** `cd frontend && npm install && npm run dev` — keep **`server/`** running on **5050** for API proxy.
+
+---
+
+### `server/` — Node.js server (Express)
+
+Runs on the host; loads **`backend/.env`**. Serves **`frontend/dist`** when built.
+
+| Path | Purpose |
+|------|---------|
+| `package.json` | `npm start` → `node index.js` |
+| `index.js` | Express: static files, CORS, **`POST /api/pipeline`** (SSE), **`GET /api/pipeline/export/...`** |
+| `pipeline.js` | Orchestration: ingest → rows → CSVs → spawn judges → Supabase updates |
+| `ingest.js` | Soul reporting API → Supabase upsert |
+| `db.js` | Postgres (Supabase) client + range queries |
+| `datetimeTz.js` | Timezone / UTC helpers |
+| `csvExportRegistry.js` | Short-lived download tokens after a run |
+| `README.md` | Server-only notes |
+
+**Run:** `cd server && npm install && npm start` → default `http://0.0.0.0:5050`.
+
+---
+
+### `backend/` — Python backend & config
+
+Not a standalone HTTP server. **`server/`** reads **`backend/.env`** and runs Python under **`backend/scripts/`**.
+
+| Path | Purpose |
+|------|---------|
+| `.env` | `OPENAI_API_KEY`, `SUPABASE_DB_*`, optional `PIPELINE_PYTHON`, `APP_ORIGIN`, etc. |
+| `requirements.txt` | Deps for **Launchpad** judge scripts |
+| `scripts/judge_section2.py` | Section 2 judge (CSV in/out) |
+| `scripts/judge_section3.py` | Section 3 judge (CSV in/out) |
+| `annotator-judge/` | **Optional** separate CLI — M1/M2/M3 annotator evaluation ([annotator-judge/README.md](backend/annotator-judge/README.md)) |
+| `README.md` | Backend overview |
+
+Temporary pipeline CSVs are written under `backend/scripts/` during a run.
 
 ---
 
@@ -8,141 +98,79 @@ Web app to run **LLM judges** (Section 2 and Section 3) on annotation data: pull
 
 ### Purpose
 
-Users pick a **date range** and **timezone** in the UI and start a **pipeline**. The system:
+1. **Ingest** (optional) from Soul reporting API into Supabase `new_evaluation_table`.
+2. **Load** rows for the selected UTC range.
+3. **Run** `judge_section2.py` and `judge_section3.py` in parallel.
+4. **Write** scores back to Supabase.
 
-1. **Ingests** data for that range from the read-only **Soul reporting API** into **Supabase** (table `new_evaluation_table`), if needed.
-2. **Loads** rows from Supabase for that range.
-3. **Runs** two **Python judge scripts** in parallel (Section 2 and Section 3), which call an LLM to score each row.
-4. **Writes** the judge scores and justifications back to Supabase.
+If Supabase has no rows, ingest runs as fallback (with `(created_at, email)` dedupe guard).
 
-If no rows exist in Supabase for the range, the pipeline first pulls from the Soul API and upserts (with a guard so existing `(created_at, email)` pairs are not duplicated), then continues.
-
-### High-level architecture
+### Architecture
 
 ```
-┌─────────────┐     ┌──────────────────────────────────────────────────────────┐     ┌─────────────────┐
-│   Browser   │────▶│  Node API (Express, api/)                                  │────▶│  Soul API       │
-│             │     │  • Serves React app (frontend/)                           │     │  (read-only)    │
-│  React UI   │     │  • POST /api/pipeline → runs pipeline, streams SSE logs   │     └────────┬────────┘
-│  (frontend/)│     │  • Ingest: fetch from Soul API → upsert into Supabase     │              │
-└─────────────┘     │  • Load rows from Supabase, spawn Python judges           │     ┌────────▼────────┐
-                    │  • Write judge output back to Supabase                    │────▶│  Supabase       │
-                    └────────────────────────────┬─────────────────────────────┘     │  (read/write)    │
-                                                 │                                    └─────────────────┘
-                                                 │  spawns
-                                                 ▼
-                    ┌──────────────────────────────────────────────────────────┐
-                    │  backend/                                                  │
-                    │  • Python: judge_section2.py, judge_section3.py (LLM)      │
-                    │  • .env: OPENAI_API_KEY, SUPABASE_*, etc. (shared by       │
-                    │    Node and Python)                                         │
-                    └──────────────────────────────────────────────────────────┘
+Browser (frontend/)  →  HTTP  →  server/ (Node)
+                                      ↓
+                    Soul API (read)    Supabase (read/write)
+                                      ↓
+                              spawn Python: backend/scripts/*.py
 ```
 
-- **frontend/** — React (Vite) UI: date/time inputs, timezone, “Run pipeline”, and live log stream (SSE).
-- **api/** — Node.js HTTP API: static files, `POST /api/pipeline`, pipeline orchestration, ingest, DB access, and spawning the Python judges.
-- **backend/** — Python judge scripts plus shared `.env` (no separate HTTP server). The Node process in **`api/`** loads `backend/.env` and runs `backend/scripts/*.py`.
+- **`annotator-judge/`** is **not** on this path; it is a separate CLI for annotator-vs-golden workflows.
 
-Together, **`api/` + `backend/`** are the application backend (Node orchestration + Python judges + env).
+### Pipeline steps
 
-### Pipeline flow (step by step)
-
-1. User submits **date_from**, **date_to**, and **timezone** from the UI.
-2. The **API** (`api/`) converts the range to UTC using the chosen timezone (e.g. GMT).
-3. **Ingest (optional):**  
-   - Call Soul reporting API with the UTC range and fixed stage IDs.  
-   - Upsert results into Supabase `new_evaluation_table` (after removing rows that would duplicate existing `(created_at, email)`).
-4. **Load rows:** Query Supabase for the UTC range. If no rows are found, run ingest again (fallback) and retry the Supabase query.
-5. **Judge:**  
-   - Write two CSVs (Section 2 and Section 3 inputs) under `backend/scripts/`.  
-   - Spawn `judge_section2.py` and `judge_section3.py` in parallel.  
-   - Each script reads its CSV, calls the LLM, and writes an output CSV with scores.
-6. **Write back:** Parse the output CSVs and `UPDATE` the corresponding rows in Supabase (Section 2 and Section 3 columns).
-7. **SSE:** The API streams progress and log lines to the browser so the user sees live status.
-
-### Data and timezone
-
-- **Soul API** and **Supabase** use **UTC** for `created_at`.
-- The UI sends **wall-clock** from/to in the user’s chosen timezone (default **GMT**). The API converts to UTC for all Soul/Supabase queries so results align with tools like Metabase (GMT).
-
----
-
-## Repository structure
-
-```
-Launchpad-eval/
-├── frontend/                 # React (Vite) — UI only
-│   ├── src/App.jsx           # Main app: date range, pipeline trigger, SSE log view
-│   ├── package.json
-│   └── .env                  # VITE_API_BASE_URL (e.g. https://teamdeccanrm.in)
-├── api/                      # Node.js API + pipeline (Express)
-│   ├── index.js              # Express app, static files, POST /api/pipeline, SSE
-│   ├── pipeline.js           # Ingest → fetch rows → run judges → apply scores
-│   ├── ingest.js             # Soul API client + Supabase upsert
-│   ├── db.js                 # Postgres config + fetchRowsForRange
-│   ├── datetimeTz.js         # Wall time → UTC conversion
-│   ├── csvExportRegistry.js  # Short-lived tokens for browser CSV/JSON downloads
-│   └── package.json
-├── backend/                  # Python judges + shared config (no HTTP server)
-│   ├── .env                  # OPENAI_API_KEY, SUPABASE_*, PIPELINE_TIMEZONE, etc.
-│   └── scripts/
-│       ├── judge_section2.py
-│       └── judge_section3.py
-└── README.md
-```
+1. UI sends `date_from` / `date_to` (GMT/UTC).
+2. **`server/`** converts to UTC for Soul and Postgres.
+3. Ingest → load rows → write input CSVs → run judges → apply output CSVs to Supabase.
+4. SSE streams logs; optional browser downloads via export token.
 
 ---
 
 ## Quick start
 
-### 1. Backend env (required)
+### 1. Configure `backend/.env`
 
-Create `backend/.env` with at least:
+`OPENAI_API_KEY`, `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_NAME`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD`, etc.
 
-- `OPENAI_API_KEY` (or `ANTHROPIC_API_KEY` if the judges use it)
-- `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_NAME`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD`
-
-Optional: `PIPELINE_TIMEZONE` (default UTC), Soul API key if required by the reporting API.
-
-### 2. Node API (`api/`)
+### 2. Start the server
 
 ```bash
-cd api && npm install && npm start
+cd server && npm install && npm start
 ```
 
-Runs at **http://0.0.0.0:5050** (or set `PORT` / `HOST` in env). Loads `backend/.env` and serves the React app from `frontend/dist` if present, otherwise from `frontend/`.
+### 3. Start the frontend (development)
 
-### 3. Frontend
+```bash
+cd frontend && npm install && npm run dev
+```
 
-- **Development:** In another terminal:
-  ```bash
-  cd frontend && npm install && npm run dev
-  ```
-  Open **http://127.0.0.1:5173**. Vite proxies `/api` to the Node API on 5050.
+Open **http://127.0.0.1:5173**.
 
-- **Production (single process):** Build the frontend, then run only the API:
-  ```bash
-  cd frontend && npm install && npm run build
-  cd ../api && npm start
-  ```
-  Open **http://127.0.0.1:5050** (or your host).
+### Production (single process)
 
-### Pipeline CSV / JSON downloads
+```bash
+cd frontend && npm install && npm run build
+cd ../server && npm install && npm start
+```
 
-With **“enable browser downloads”** checked (default), a successful run registers a short-lived token. The UI shows buttons to download Section 2/3 **input and judge output CSVs** plus a small **JSON run summary**. Files are still written under `backend/scripts/` for the judges; downloads use `GET /api/pipeline/export/:token/:which` (token expires in about an hour; in-memory store, so use one API instance or accept that tokens may not work behind multiple load-balanced nodes without sticky sessions).
+Open **http://127.0.0.1:5050** (or your host).
 
 ---
 
-## Production and hosting
+## Production & hosting
 
-- **Live URL:** The app is intended to be hosted at **https://teamdeccanrm.in**. Set `VITE_API_BASE_URL=https://teamdeccanrm.in` in `frontend/.env` so the built frontend calls the same origin for the API.
-- **CORS:** The Node API allows `https://teamdeccanrm.in` and localhost by default. Override with `APP_ORIGIN` (comma-separated) in `backend/.env` if needed.
-- **Render:** Use **Build:** `cd api && npm install && cd ../frontend && npm install && npm run build` and **Start:** `cd api && node index.js`. Add env vars (Supabase, OpenAI, etc.) in the Render dashboard. For Python judges, deploy with a **Docker** image that includes Node and Python, or use a Render native environment that supports both.
+- **CORS:** `APP_ORIGIN` in `backend/.env` if needed.
+- **Render (example):** Build `server` + `frontend` (`npm run build`), start `cd server && node index.js`. For Python judges, use an environment with **Node + Python** (e.g. Docker).
+
+---
+
+## Naming note: `/api` vs `server/`
+
+- Folder **`server/`** = Node application directory.
+- URL paths like **`/api/pipeline`** = HTTP routes (used by `fetch` from the frontend). Vite proxies **`/api`** to port 5050 in dev.
 
 ---
 
-## Date range and timezone (GMT)
+## Git cleanup
 
-Data is stored in **GMT/UTC**. In the UI, keep timezone as **GMT (UTC)** (or set `PIPELINE_TIMEZONE=UTC` in `backend/.env`). From/to are interpreted as wall time in that zone; the API converts them to UTC for the Soul API and Supabase so filtering matches Metabase and other GMT-based reports.
-
----
+See **[docs/GIT_CLEANUP.md](docs/GIT_CLEANUP.md)** if present.

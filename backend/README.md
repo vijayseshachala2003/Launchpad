@@ -1,12 +1,15 @@
-# Backend (Python judge scripts + env)
+# Backend (Python + config)
 
-The **Node API** (`../api/`) runs the HTTP server and pipeline; it loads `.env` from here and invokes the judge scripts in `scripts/`.
+Full repo layout: **[../README.md](../README.md)** (`frontend/` vs `server/` vs `backend/`).
+
+The **Node server** (`../server/`) runs the HTTP server and pipeline; it loads `.env` from **this directory** and invokes the judge scripts in `scripts/`.
 
 | Path | Purpose |
 |------|---------|
 | `.env` | `OPENAI_API_KEY`, `SUPABASE_*`, optional `PIPELINE_TIMEZONE` (default GMT/UTC) |
-| `requirements.txt` | Python deps for judge scripts only (`openai`, `python-dotenv`) |
-| **`scripts/`** | See below |
+| `requirements.txt` | Python deps for Launchpad judge scripts only (`openai`, `python-dotenv`) |
+| **`scripts/`** | Section 2 & 3 judges (see below) |
+| **`annotator-judge/`** | Optional **separate** Python CLI (M1/M2/M3 annotator vs golden); not invoked by `server/` yet |
 
 ## `scripts/`
 
@@ -21,4 +24,8 @@ Install deps only if you run the judges directly (e.g. for testing):
 pip install -r requirements.txt
 ```
 
-Otherwise the Node process in `api/` runs the pipeline and calls these scripts with the right env.
+Otherwise the Node process in `server/` runs the pipeline and calls these scripts with the right env.
+
+## `annotator-judge/`
+
+Standalone **annotator evaluation** toolkit (M1/M2/M3). See **[annotator-judge/README.md](annotator-judge/README.md)**.

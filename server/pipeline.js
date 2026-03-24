@@ -19,7 +19,8 @@ UPDATE new_evaluation_table SET
   sec_2_judge_model = $1, sec_2_evaluation_score = $2, sec_2_evaluation_justification = $3,
   sec_2_attention_to_detail_score = $4, sec_2_attention_to_detail_justification = $5,
   sec_2_articulation_score = $6, sec_2_articulation_justification = $7,
-  sec_2_comprehension_score = $8, sec_2_comprehension_justification = $9
+  sec_2_comprehension_score = $8, sec_2_comprehension_justification = $9,
+  sec_2_evaluated_at = NOW(), sec_2_eval_status = 'COMPLETED'
 WHERE uniqueid = $10
 `;
 
@@ -27,7 +28,8 @@ const UPDATE_SEC3 = `
 UPDATE new_evaluation_table SET
   sec3_judge_model = $1, reasoning_score = $2, reasoning_justification = $3,
   sec3_evaluation_score = $4, sec3_evaluation_justification = $5,
-  sec3_articulation_score = $6, sec3_articulation_justification = $7
+  sec3_articulation_score = $6, sec3_articulation_justification = $7,
+  sec_3_evaluated_at = NOW(), sec_3_eval_status = 'COMPLETED'
 WHERE uniqueid = $8
 `;
 
@@ -168,7 +170,7 @@ async function applySection3Scores(csvPath) {
 const COMPLETED_RE = /Completed\s+(\d+)\/(\d+)/;
 
 /** Run one judge; onLine(label, line) called for each line; resolves with { code, err } when done */
-function runJudgeStream(cmd, cwd, env, label, onLine) {
+export function runJudgeStream(cmd, cwd, env, label, onLine) {
   return new Promise((resolve) => {
     const proc = spawn(cmd[0], cmd.slice(1), {
       cwd,
@@ -210,8 +212,11 @@ export async function* runPipelineEvents(opts, send = () => {}) {
       message: `Ingesting from API (GMT/UTC range: ${dateFrom} … ${dateTo})…`,
     };
     try {
-      const n = await runIngest(dateFrom, dateTo);
-      yield { type: 'log', message: `Ingest upserted ${n} rows into new_evaluation_table.` };
+      const ing = await runIngest(dateFrom, dateTo);
+      yield {
+        type: 'log',
+        message: `Ingest: ${ing.soul_rows_fetched} from Soul; ${ing.rows_inserted} inserted; ${ing.skipped_existing} already in DB (unchanged).`,
+      };
     } catch (e) {
       yield { type: 'error', message: `Ingest failed: ${e.message}` };
       return;
@@ -235,17 +240,17 @@ export async function* runPipelineEvents(opts, send = () => {}) {
       message: 'No rows in Supabase for this range — querying read-only Soul API and ingesting…',
     };
     try {
-      const nFallback = await runIngest(dateFrom, dateTo);
+      const fb = await runIngest(dateFrom, dateTo);
       yield {
         type: 'log',
-        message: `Read-only ingest complete: ${nFallback} row(s) upserted into Supabase.`,
+        message: `Fallback ingest: ${fb.soul_rows_fetched} from Soul; ${fb.rows_inserted} inserted; ${fb.skipped_existing} already in DB.`,
       };
+      if (fb.soul_rows_fetched === 0) {
+        yield { type: 'error', message: 'Read-only API returned no rows for this date range.' };
+        return;
+      }
     } catch (e) {
       yield { type: 'error', message: `Read-only ingest failed: ${e.message}` };
-      return;
-    }
-    if (nFallback === 0) {
-      yield { type: 'error', message: 'Read-only API returned no rows for this date range.' };
       return;
     }
     try {

@@ -2,7 +2,28 @@ import pg from 'pg';
 
 const { Client } = pg;
 
+/** Supabase / Postgres URI from env (any one is enough). */
+function databaseUrlFromEnv() {
+  return (
+    process.env.DATABASE_URL ||
+    process.env.SUPABASE_DATABASE_URL ||
+    process.env.SUPABASE_DB_URL ||
+    process.env.database_URL ||
+    process.env.database_url ||
+    ''
+  ).trim();
+}
+
+/**
+ * Options for `pg.Client`.
+ * If `DATABASE_URL` (or `SUPABASE_DATABASE_URL`, etc.) is set in `backend/.env`, it wins over discrete `SUPABASE_DB_*`.
+ */
 export function getPostgresConfig() {
+  const conn = databaseUrlFromEnv();
+  if (conn) {
+    return { connectionString: conn };
+  }
+
   let host = (process.env.SUPABASE_DB_HOST || '').trim().replace(/\/+$/, '');
   if (host.startsWith('http://') || host.startsWith('https://')) {
     try {
@@ -18,8 +39,18 @@ export function getPostgresConfig() {
     database: process.env.SUPABASE_DB_NAME || 'postgres',
     user: process.env.SUPABASE_DB_USER,
     password: process.env.SUPABASE_DB_PASSWORD,
-    ssl: { rejectUnauthorized: true },
+    ssl: { rejectUnauthorized: false },
+        family:4
   };
+}
+
+/** True if env has enough config for a DB connection. */
+export function hasPostgresConfig() {
+  if (databaseUrlFromEnv()) return true;
+  const host = (process.env.SUPABASE_DB_HOST || '').trim();
+  const user = (process.env.SUPABASE_DB_USER || '').trim();
+  const pass = process.env.SUPABASE_DB_PASSWORD;
+  return Boolean(host && user && pass != null && String(pass).length > 0);
 }
 
 /**

@@ -1,18 +1,20 @@
 # Frontend (React + Vite)
 
-Client-side rendered pipeline UI. Same behavior as before: timezone, date range, max rows, skip ingest, run pipeline, SSE log and progress.
+**Client-side only** — runs in the browser. The **server** app lives in **`../server/`** (Node.js); Python judges and env live in **`../backend/`**.
 
-| Path           | Purpose                    |
-|----------------|----------------------------|
-| `index.html`   | Vite entry                 |
-| `src/main.jsx` | React root                 |
-| `src/App.jsx`  | Pipeline form + SSE logic  |
-| `src/index.css`| Styles                     |
-| `vite.config.js` | Dev proxy `/api` → Flask |
-| `.env.example`   | Template for optional `VITE_API_BASE_URL` (copy to `.env`) |
+See **[root README.md](../README.md)** for the full three-folder map.
 
-**Optional:** Copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_BASE_URL` if the API is on another origin (e.g. `http://127.0.0.1:5050`). Leave empty for same-origin or Vite proxy.
+| Path | Purpose |
+|------|---------|
+| `index.html` | Vite entry |
+| `src/main.jsx` | React root |
+| `src/App.jsx` | Tabs: Assessment Evaluation vs Annotator Judge |
+| `src/AssessmentEvaluation.jsx` | Launchpad pipeline + SSE |
+| `src/AnnotatorJudgePanel.jsx` | Docs for `backend/annotator-judge/` |
+| `src/index.css` | Styles |
+| `vite.config.js` | Proxies **`/api`** → `http://127.0.0.1:5050` |
+| `.env.example` | Copy to `.env` for optional `VITE_API_BASE_URL` |
 
-**Dev:** `npm install && npm run dev` → http://127.0.0.1:5173 (run `api/` with `npm start` on port 5050).
+**Dev:** `npm install && npm run dev` → http://127.0.0.1:5173 — run **`../server`** with `npm start` on port **5050**.
 
-**Build:** `npm run build` → `dist/`. Flask serves `dist/` when present.
+**Build:** `npm run build` → `dist/`. **`server/`** serves `dist/` in production.

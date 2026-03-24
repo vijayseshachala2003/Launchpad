@@ -60,11 +60,24 @@ h1 {
   margin-bottom: 1rem;
 }
 
-.field label {
+.field label,
+.field-label-text {
   display: block;
   font-size: 0.8rem;
   color: var(--muted);
   margin-bottom: 0.35rem;
+}
+
+.timezone-static-field .timezone-static {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.timezone-fixed-tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .field select,
@@ -235,4 +248,104 @@ button:disabled {
 .download-buttons button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Multi-section shell */
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.app-header {
+  margin-bottom: 1.25rem;
+}
+
+.app-brand {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 0.75rem 0;
+}
+
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.nav-btn {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nav-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.nav-btn.active {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--text);
+}
+
+.section-panel h1 {
+  margin-top: 0;
+}
+
+.bullet-list {
+  margin: 0.5rem 0 0 1.1rem;
+  line-height: 1.5;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.bullet-list li {
+  margin-bottom: 0.35rem;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.info-table th,
+.info-table td {
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+}
+
+.info-table th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.72rem;
+  overflow-x: auto;
+  line-height: 1.45;
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.card-muted {
+  border-style: dashed;
+  opacity: 0.98;
 }
