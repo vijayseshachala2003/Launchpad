@@ -1,0 +1,1170 @@
+[
+  {
+    "subtask_id": "2069",
+    "annotator_id": "usr_4EF2B6C45D2D4ED897520E3A6DD745D1",
+    "annotator_name": "mohitmahur8973@gmail.com",
+    "scores_a": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "No Issues",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "scores_b": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "No Issues",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "annotator_likert": "A and B are about the same",
+    "golden_likert": "A and B are about the same",
+    "likert_match": true,
+    "likert_penalty": 0.0,
+    "justification": "Both responses are polite, natural, and fulfill the user query.\nContext content is provided, but TalkBack is not explicitly listed in the steps. However, both responses still fulfill the user query politely and completely.\nBoth A and B respone are well - writtend, stylish, and Grammatically corrected.\nThere are no issues related to context awareness, collaboration, tool usage, or retrieval.\nThe responses are concise, easy to understand and do not include any unnecessary or misleading information.\n",
+    "dimension_score": 0.9230769230769231,
+    "justification_coherence": null,
+    "justification_coherence_score": 0.5,
+    "rubric_compliance": null,
+    "rubric_compliance_score": null,
+    "final_score": 0.8384615384615385,
+    "flagged": true,
+    "flag_reasons": [
+      "P0 mismatches: 4"
+    ],
+    "justification_score": 0.5,
+    "llm_judge_result": null
+  },
+  {
+    "subtask_id": "2070",
+    "annotator_id": "usr_A99B2640EFF646FBB6B62A68C4B75C9C",
+    "annotator_name": "subhajitbasak010@gmail.com",
+    "scores_a": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "No Issues",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "scores_b": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "No Issues",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "annotator_likert": "A and B are about the same",
+    "golden_likert": "A and B are about the same",
+    "likert_match": true,
+    "likert_penalty": 0.0,
+    "justification": "Both models responded correctly with the user's intent, created notes with proper text given by the user. The content is also complete and fulfils every requirements. Both the models are about the same comparing there responses.",
+    "dimension_score": 0.9615384615384616,
+    "justification_coherence": null,
+    "justification_coherence_score": 0.5,
+    "rubric_compliance": null,
+    "rubric_compliance_score": null,
+    "final_score": 0.8692307692307693,
+    "flagged": true,
+    "flag_reasons": [
+      "P0 mismatches: 2"
+    ],
+    "justification_score": 0.5,
+    "llm_judge_result": null
+  },
+  {
+    "subtask_id": "2067",
+    "annotator_id": "usr_A99B2640EFF646FBB6B62A68C4B75C9C",
+    "annotator_name": "subhajitbasak010@gmail.com",
+    "scores_a": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "scores_b": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "annotator_likert": "A and B are about the same",
+    "golden_likert": "A and B are about the same",
+    "likert_match": true,
+    "likert_penalty": 0.0,
+    "justification": "Both models goes through the users intent carefully and responded correctly asking whom about to call as the user didn't provide any specific name or contact to call via WhatsApp. Although the wordings are different for the responses, both are factually correct and acceptable resulting in the relative quality of the responses about the same.",
+    "dimension_score": 1.0,
+    "justification_coherence": null,
+    "justification_coherence_score": 0.5,
+    "rubric_compliance": null,
+    "rubric_compliance_score": null,
+    "final_score": 0.9,
+    "flagged": false,
+    "flag_reasons": [],
+    "justification_score": 0.5,
+    "llm_judge_result": null
+  },
+  {
+    "subtask_id": "2065",
+    "annotator_id": "usr_4EF2B6C45D2D4ED897520E3A6DD745D1",
+    "annotator_name": "mohitmahur8973@gmail.com",
+    "scores_a": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "Minor Issue(s)",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Minor room for improvement",
+        "golden_value": "Cannot be improved",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      }
+    ],
+    "scores_b": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P1",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "annotator_likert": "B is slightly better than A",
+    "golden_likert": "A and B are about the same",
+    "likert_match": false,
+    "likert_penalty": 0.2,
+    "justification": "B is slightly better than A in politness and more user friendly manner.\nRespone A is slightly robotic in nature but Respone B is user friendly.\nResponse A - Context is provided in both the respone but Google map is not listed in the context but both the respone easily able to fullfill and complete the user query.\nRespone A need some politness and respone B is fully correct.\nThere are no issues related to context awareness, collaboration, tool usage, or retrieval.\n",
+    "dimension_score": 0.7076923076923076,
+    "justification_coherence": null,
+    "justification_coherence_score": 0.5,
+    "rubric_compliance": null,
+    "rubric_compliance_score": null,
+    "final_score": 0.6661538461538461,
+    "flagged": true,
+    "flag_reasons": [
+      "P0 mismatches: 10"
+    ],
+    "justification_score": 0.5,
+    "llm_judge_result": null
+  },
+  {
+    "subtask_id": "2066",
+    "annotator_id": "usr_A99B2640EFF646FBB6B62A68C4B75C9C",
+    "annotator_name": "subhajitbasak010@gmail.com",
+    "scores_a": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Cannot be improved",
+        "golden_value": "Cannot be improved",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      }
+    ],
+    "scores_b": [
+      {
+        "dimension_id": "punt",
+        "annotator_value": "Response is a not a punt",
+        "golden_value": "Response is a not a punt",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "instruction",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "context_awareness",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "relevance",
+        "annotator_value": "Minor Issue(s)",
+        "golden_value": "Minor Issue(s)",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "completeness",
+        "annotator_value": "Minor Issue(s)",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "writing_style",
+        "annotator_value": "No Issues",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "collab",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "factuality",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "No Issues",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      },
+      {
+        "dimension_id": "info_retrieval",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_sequence",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "code_output",
+        "annotator_value": "N/A - Not Applicable",
+        "golden_value": "N/A - Not Applicable",
+        "priority": "P0",
+        "penalty": 0.0,
+        "match": true
+      },
+      {
+        "dimension_id": "overall",
+        "annotator_value": "Okay",
+        "golden_value": "Minor room for improvement",
+        "priority": "P0",
+        "penalty": 1.0,
+        "match": false
+      }
+    ],
+    "annotator_likert": "A is better than B",
+    "golden_likert": "A is slightly better than B",
+    "likert_match": false,
+    "likert_penalty": 0.2,
+    "justification": "Here in this prompt the user's only intent is to create a note tilted \"volunteer opportunities near me\", which was asked to google and the model responded. The response A did it perfectly and gave the user a message regarding the note creation on google keep, it acts as a straight forward complete response. On the other hand response B acted here as overactive nature, and  beside the creation of the note with appropriate title, it also searched for local opportunities including links and contact details, and added them into the note which was not asked by the user to do. This results in the choice of minor issue for response B in completeness, content relevance and the overall response is okay. That's why response A is better that B.",
+    "dimension_score": 0.823076923076923,
+    "justification_coherence": null,
+    "justification_coherence_score": 0.5,
+    "rubric_compliance": null,
+    "rubric_compliance_score": null,
+    "final_score": 0.7584615384615384,
+    "flagged": true,
+    "flag_reasons": [
+      "P0 mismatches: 4"
+    ],
+    "justification_score": 0.5,
+    "llm_judge_result": null
+  }
+]

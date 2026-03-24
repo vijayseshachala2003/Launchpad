@@ -50,7 +50,7 @@ Launchpad-eval/
 | `src/main.jsx` | React bootstrap |
 | `src/App.jsx` | Shell: tabs **Assessment Evaluation** vs **Annotator Judge** |
 | `src/AssessmentEvaluation.jsx` | Launchpad pipeline UI (dates, run, SSE, CSV downloads) |
-| `src/AnnotatorJudgePanel.jsx` | Help text for `backend/annotator-judge/` |
+| `src/AnnotatorJudgePanel.jsx` | Annotator judge UI: Soul ingest, **full M1/M2/M3 pipeline** (SSE + downloads) |
 | `src/index.css` | Styles |
 | `README.md` | Frontend notes |
 
@@ -65,9 +65,16 @@ Runs on the host; loads **`backend/.env`**. Serves **`frontend/dist`** when buil
 | Path | Purpose |
 |------|---------|
 | `package.json` | `npm start` → `node index.js` |
-| `index.js` | Express: static files, CORS, **`POST /api/pipeline`** (SSE), **`GET /api/pipeline/export/...`** |
-| `pipeline.js` | Orchestration: ingest → rows → CSVs → spawn judges → Supabase updates |
-| `ingest.js` | Soul reporting API → Supabase upsert |
+| `index.js` | Express: static files, CORS, **`POST /api/pipeline`**, **`POST /api/judge-ingest`**, **`POST /api/annotator-judge-pipeline`**, export GETs |
+| `pipeline.js` | Launchpad: ingest → rows → Section 2/3 judges → Supabase (**exports `runJudgeStream`**) |
+| `annotatorJudgePipeline.js` | Annotator path: ingest → join gold → **`batch_evaluate.py`** → optional downloads |
+| `annotatorJudgeDb.js` | Postgres: annotator rows ∩ **`golden-mock-tasking`** |
+| `annotatorJudgeExportRegistry.js` | Short-lived tokens for annotator pipeline artifacts |
+| `ingest.js` | Soul → **`new_evaluation_table`** (Assessment Evaluation) |
+| `ingestJudge.js` | Soul → **`annotator_judge_table`** (annotator-judge stages) |
+| `sql/annotator_judge_table.sql` | DDL for **`annotator_judge_table`** |
+| `sql/golden-mock-tasking.sql` | DDL for gold labels table **`golden-mock-tasking`** |
+| `loadGoldenMockTasking.js` | **`npm run load-golden-mock`** — CSV → Supabase gold table |
 | `db.js` | Postgres (Supabase) client + range queries |
 | `datetimeTz.js` | Timezone / UTC helpers |
 | `csvExportRegistry.js` | Short-lived download tokens after a run |
@@ -115,7 +122,7 @@ Browser (frontend/)  →  HTTP  →  server/ (Node)
                               spawn Python: backend/scripts/*.py
 ```
 
-- **`annotator-judge/`** is **not** on this path; it is a separate CLI for annotator-vs-golden workflows.
+- **`annotator-judge/`** — Python **`batch_evaluate.py`** is spawned by **`POST /api/annotator-judge-pipeline`** (after Soul ingest + join to **`golden-mock-tasking`**). Static mappings: **`backend/annotator-judge/config/ae_v1_mappings.json`**. Gold CSV load: **`cd server && npm run load-golden-mock`**. M2/M3 need **`GOOGLE_API_KEY`** (or Together) in **`backend/.env`**. Prompt/ResponseA/B are not in the current gold CSV; M2/M3 see empty context unless you extend gold or Soul export.
 
 ### Pipeline steps
 
@@ -130,7 +137,7 @@ Browser (frontend/)  →  HTTP  →  server/ (Node)
 
 ### 1. Configure `backend/.env`
 
-`OPENAI_API_KEY`, `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_NAME`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD`, etc.
+`OPENAI_API_KEY`, and Postgres via **`DATABASE_URL`** or **`SUPABASE_DATABASE_URL`** (recommended), or discrete `SUPABASE_DB_HOST`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD`, etc.
 
 ### 2. Start the server
 

@@ -6,7 +6,7 @@ The **Node server** (`../server/`) runs the HTTP server and pipeline; it loads `
 
 | Path | Purpose |
 |------|---------|
-| `.env` | `OPENAI_API_KEY`, `SUPABASE_*`, optional `PIPELINE_TIMEZONE` (default GMT/UTC) |
+| `.env` | `OPENAI_API_KEY`, **`DATABASE_URL`** or **`SUPABASE_DATABASE_URL`** (or discrete `SUPABASE_DB_*`), optional `PIPELINE_TIMEZONE` |
 | `requirements.txt` | Python deps for Launchpad judge scripts only (`openai`, `python-dotenv`) |
 | **`scripts/`** | Section 2 & 3 judges (see below) |
 | **`annotator-judge/`** | Optional **separate** Python CLI (M1/M2/M3 annotator vs golden); not invoked by `server/` yet |

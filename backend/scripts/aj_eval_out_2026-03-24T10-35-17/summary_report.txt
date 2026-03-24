@@ -1,0 +1,55 @@
+======================================================================
+ANNOTATOR EVALUATION SUMMARY REPORT
+Generated: 2026-03-24 16:05:17
+======================================================================
+
+## OVERVIEW
+Total Annotations: 5
+Unique Annotators: 2
+Unique Tasks: 5
+
+## SCORE STATISTICS
+
+### Final Score (80% M1 + 20% M2)
+  Mean:   0.8065
+  Std:    0.0945
+  Median: 0.8385
+  Min:    0.6662
+  Max:    0.9000
+
+### M1: Dimension Score (Golden Alignment)
+  Mean: 0.8831  |  Count: 5
+
+### M2: Justification Coherence (Internal Consistency)
+  Mean: 0.5000  |  Count: 5
+
+## QUALITY FLAGS
+Flagged Annotations: 4 (80.0%)
+
+## LIKERT ACCURACY
+Exact Match Rate: 60.0%
+
+## TOP ANNOTATORS
+----------------------------------------------------------------------
+  subhajitbasak010@gma | Final:0.84 | M1:0.93 | M2:0.50 | N=3
+  mohitmahur8973@gmail | Final:0.75 | M1:0.82 | M2:0.50 | N=2
+
+## DIMENSION ACCURACY (M1 Breakdown)
+----------------------------------------------------------------------
+  ✓ code                               : 80.0%
+  ✓ code_output                        : 80.0%
+  ✓ code_sequence                      : 80.0%
+  ✓ collab                             : 80.0%
+  ✓ completeness                       : 90.0%
+  ✓ context_awareness                  : 80.0%
+  ✗ factuality                         : 40.0%
+  ✓ info_retrieval                     : 100.0%
+  ✓ instruction                        : 100.0%
+  ✓ overall                            : 80.0%
+  ✓ punt                               : 100.0%
+  ✓ relevance                          : 100.0%
+  ✓ writing_style                      : 90.0%
+
+======================================================================
+END OF REPORT
+======================================================================

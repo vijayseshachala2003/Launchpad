@@ -1,0 +1,5 @@
+annotator_id,annotator_name,num_annotations,avg_final_score,std_final_score,avg_m1_score,avg_m2_score,num_flagged,flag_rate,likert_accuracy,avg_dimension_score
+usr_A99B2640EFF646FBB6B62A68C4B75C9C,subhajitbasak010@gmail.com,1,0.9,0,1.0,0.5,0,0.0,1.0,1.0
+usr_1816AA5B9E23452BA6CAD4A624FA8A0F,srikant2014@gmail.com,1,0.7400000000000001,0,0.8,0.5,1,1.0,0.0,0.8
+usr_7BFE68E57E1E49E7A0459380BF8F7B52,gunjapriyanka611@gmail.com,1,0.696923076923077,0,0.7461538461538462,0.5,1,1.0,0.0,0.7461538461538462
+usr_25E2D224802545B1B7493B6AF6CCDE16,chithra.ranjit@gmail.com,2,0.5353846153846153,0.041338550284752,0.5442307692307693,0.5,2,1.0,0.5,0.5442307692307693

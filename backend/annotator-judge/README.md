@@ -59,6 +59,7 @@ This folder is a **standalone Python CLI app** (not the Launchpad `server/` pipe
 
 | Path | Purpose |
 |------|---------|
+| `config/ae_v1_mappings.json` | Fixed column mappings for AE-v1-style Soul/CSV columns (used by repo **`server/annotatorJudgePipeline.js`**). |
 | `requirements.txt` | Pip dependencies for this project. |
 | `.gitignore` | Ignores `.env`, `__pycache__`, venvs, etc. |
 | `LLM_Judge_Terms.docx` | Reference glossary / terms (human-readable). |
