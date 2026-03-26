@@ -12,6 +12,12 @@ import { serveExport } from './csvExportRegistry.js';
 import { serveAnnotatorJudgeExport } from './annotatorJudgeExportRegistry.js';
 import { verifyAnnotatorJudgeDbConnection } from './annotatorJudgeDb.js';
 import { attachSseKeepalive, setupSseHeaders } from './sseStream.js';
+import { addStageId, listStageIdsByPurpose, STAGE_ID_PURPOSE } from './stageIdsDb.js';
+import {
+  bulkUploadGoldenDatasetCsv,
+  GOLDEN_PURPOSES,
+  getGoldenUploadRules,
+} from './goldenDatasetsBulkUpload.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -32,7 +38,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 const staticDir = existsSync(path.join(FRONTEND_DIST, 'index.html'))
   ? FRONTEND_DIST
@@ -77,6 +83,66 @@ app.get('/api/annotator-judge/export/:token/:which', async (req, res) => {
   res.send(result.body);
 });
 
+/** Stage-id config for Soul ingest (purpose: launchpad_eval | annotator_judge). */
+app.get('/api/stage-ids', async (req, res) => {
+  const purpose = String(req.query.purpose || '').trim();
+  if (!Object.values(STAGE_ID_PURPOSE).includes(purpose)) {
+    return res.status(400).json({
+      error: `purpose is required and must be one of: ${Object.values(STAGE_ID_PURPOSE).join(', ')}`,
+    });
+  }
+  try {
+    const rows = await listStageIdsByPurpose(purpose);
+    return res.json({ purpose, stage_ids: rows.map((r) => r.id) });
+  } catch (e) {
+    return res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+app.post('/api/stage-ids', async (req, res) => {
+  const data = req.body || {};
+  const purpose = String(data.purpose || '').trim();
+  const stageId = String(data.id || '').trim();
+  if (!stageId || !purpose) {
+    return res.status(400).json({ error: 'id and purpose are required.' });
+  }
+  if (!Object.values(STAGE_ID_PURPOSE).includes(purpose)) {
+    return res.status(400).json({
+      error: `purpose must be one of: ${Object.values(STAGE_ID_PURPOSE).join(', ')}`,
+    });
+  }
+  try {
+    const saved = await addStageId(stageId, purpose);
+    return res.status(201).json({ ok: true, stage_id: saved.id, purpose: saved.purpose });
+  } catch (e) {
+    return res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
+/** Golden datasets upload rules shown in frontend. */
+app.get('/api/golden-datasets/upload-rules', (_req, res) => {
+  return res.json({
+    purposes: GOLDEN_PURPOSES,
+    rules: getGoldenUploadRules(),
+  });
+});
+
+/** Bulk upload CSV rows into golden_datasets with per-purpose validation. */
+app.post('/api/golden-datasets/bulk-upload', async (req, res) => {
+  const data = req.body || {};
+  const purpose = String(data.purpose || '').trim();
+  const csvText = String(data.csv_text || '');
+  if (!purpose || !csvText.trim()) {
+    return res.status(400).json({ error: 'purpose and csv_text are required.' });
+  }
+  try {
+    const out = await bulkUploadGoldenDatasetCsv({ purpose, csvText });
+    return res.status(201).json({ ok: true, ...out });
+  } catch (e) {
+    return res.status(400).json({ error: String(e.message || e) });
+  }
+});
+
 app.post('/api/pipeline', async (req, res) => {
   const data = req.body || {};
   const rawFrom = (data.date_from || '').trim();
@@ -108,6 +174,20 @@ app.post('/api/pipeline', async (req, res) => {
   if (Number.isNaN(maxRows)) maxRows = 0;
   const skipIngest = Boolean(data.skip_ingest);
   const downloadCsv = Boolean(data.download_csv);
+  const thresholdRaw = typeof data.threshold_score === 'number'
+    ? String(data.threshold_score)
+    : String(data.threshold_score || '').trim();
+  const threshold = Number.parseFloat(thresholdRaw);
+  const section1ThresholdRaw = typeof data.section1_threshold === 'number'
+    ? String(data.section1_threshold)
+    : String(data.section1_threshold || '').trim();
+  const section1Threshold = Number.parseFloat(section1ThresholdRaw);
+  if (!Number.isFinite(threshold)) {
+    return res.status(400).json({ error: 'threshold_score is required and must be a valid number.' });
+  }
+  if (!Number.isFinite(section1Threshold)) {
+    return res.status(400).json({ error: 'section1_threshold is required and must be a valid number.' });
+  }
 
   const pythonCmd = process.env.PIPELINE_PYTHON || 'python3';
 
@@ -129,6 +209,8 @@ app.post('/api/pipeline', async (req, res) => {
         pythonCmd,
         skipIngest,
         downloadCsv,
+        threshold,
+        section1Threshold,
       },
       send
     )) {
@@ -185,7 +267,7 @@ app.post('/api/judge-ingest', async (req, res) => {
 });
 
 /**
- * Full annotator path: optional Soul ingest → join annotator_judge_table + golden-mock-tasking →
+ * Full annotator path: optional Soul ingest → join annotator_judge_table + golden_datasets →
  * spawn backend/annotator-judge/batch_evaluate.py (M1; M2/M3 with --use-llm and optional rubric).
  */
 app.post('/api/annotator-judge-pipeline', async (req, res) => {

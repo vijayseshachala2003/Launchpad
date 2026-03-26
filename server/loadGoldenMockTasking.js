@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Load gold-label CSV into Supabase table "golden-mock-tasking".
+ * Load gold-label CSV into Supabase table "golden_datasets".
  *
- * Prereq: run server/sql/golden-mock-tasking.sql in Supabase once.
+ * Prereq: create table golden_datasets in Supabase once.
  *
  * Usage (from repo root, with backend/.env containing DATABASE_URL or SUPABASE_DB_*):
  *   cd server && npm install && node loadGoldenMockTasking.js
@@ -26,7 +26,9 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 
 dotenv.config({ path: path.join(REPO_ROOT, 'backend', '.env') });
 
-const TABLE = '"golden-mock-tasking"';
+const TABLE = '"golden_datasets"';
+const GOLDEN_PURPOSE = (process.env.GOLDEN_PURPOSE || 'annotator_judge').trim() || 'annotator_judge';
+const DEPRECATE_OLD_ON_LOAD = String(process.env.GOLDEN_DEPRECATE_OLD_ON_LOAD || '1') !== '0';
 const DEFAULT_CSV = path.join(
   REPO_ROOT,
   'backend',
@@ -54,11 +56,13 @@ function main() {
     process.exit(1);
   }
 
-  const updateCols = cols.filter((c) => c !== 'subtask_id');
-  const colList = cols.join(', ');
-  const placeholders = cols.map((_, i) => `$${i + 1}`).join(', ');
+  const metaCols = ['purpose', 'gold_created_at', 'is_active', 'deprecated_at'];
+  const allCols = [...cols, ...metaCols];
+  const updateCols = allCols.filter((c) => c !== 'subtask_id');
+  const colList = allCols.join(', ');
+  const placeholders = allCols.map((_, i) => `$${i + 1}`).join(', ');
   const setClause = updateCols.map((c) => `${c} = EXCLUDED.${c}`).join(', ');
-  const sql = `INSERT INTO ${TABLE} (${colList}) VALUES (${placeholders}) ON CONFLICT (subtask_id) DO UPDATE SET ${setClause}`;
+  const sql = `INSERT INTO ${TABLE} (${colList}) VALUES (${placeholders}) ON CONFLICT (purpose, subtask_id) DO UPDATE SET ${setClause}`;
 
   if (!hasPostgresConfig()) {
     console.error('Missing DATABASE_URL (or SUPABASE_DATABASE_URL) or SUPABASE_DB_* in backend/.env');
@@ -70,6 +74,26 @@ function main() {
   return client
     .connect()
     .then(async () => {
+      // Ensure metadata columns exist for versioned / active gold sets.
+      await client.query(`
+        ALTER TABLE ${TABLE}
+          ADD COLUMN IF NOT EXISTS purpose TEXT,
+          ADD COLUMN IF NOT EXISTS gold_created_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
+          ADD COLUMN IF NOT EXISTS deprecated_at TIMESTAMPTZ;
+      `);
+
+      // Optional behavior: when loading a new set for this purpose, deactivate the previous one.
+      if (DEPRECATE_OLD_ON_LOAD) {
+        await client.query(
+          `UPDATE ${TABLE}
+           SET is_active = false, deprecated_at = NOW()
+           WHERE COALESCE(purpose, 'annotator_judge') = $1
+             AND COALESCE(is_active, true) = true`,
+          [GOLDEN_PURPOSE]
+        );
+      }
+
       let n = 0;
       for (const row of records) {
         const values = cols.map((c) => {
@@ -77,10 +101,13 @@ function main() {
           if (v === undefined || v === '') return null;
           return String(v);
         });
+        values.push(GOLDEN_PURPOSE, new Date().toISOString(), true, null);
         await client.query(sql, values);
         n += 1;
       }
-      console.log(`Upserted ${n} row(s) into ${TABLE} from ${csvPath}`);
+      console.log(
+        `Upserted ${n} row(s) into ${TABLE} from ${csvPath} (purpose=${GOLDEN_PURPOSE}, deprecate_old=${DEPRECATE_OLD_ON_LOAD}).`
+      );
     })
     .finally(() => client.end());
 }

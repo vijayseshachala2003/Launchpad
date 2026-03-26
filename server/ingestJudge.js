@@ -6,6 +6,7 @@
 import fetch from 'node-fetch';
 import pg from 'pg';
 import { getPostgresConfig } from './db.js';
+import { getRequiredStageIds, STAGE_ID_PURPOSE } from './stageIdsDb.js';
 
 const { Client } = pg;
 
@@ -15,13 +16,8 @@ const SOURCE = 'Node ETL Judge';
 /** Override in env if you use a different table name. */
 const JUDGE_TABLE = (process.env.ANNOTATOR_JUDGE_TABLE || 'annotator_judge_table').trim();
 
-const STAGE_IDS_SQL = `(
-  'stc_260210093443510LIGAL',
-  'stc_260315191240238RD39P'
-)`;
-
 /** Soul query (same shape as ingest-mock). `A.created_at` is prepended for date-range ingest + (created_at, email) dedupe. */
-const BASE_QUERY = `
+const BASE_QUERY_PREFIX = `
 SELECT
   A.created_at,
   A.user_id,
@@ -60,8 +56,7 @@ SELECT
   A.response_data ->> 'Justification' AS justification
 FROM annotation_task_response_data A
 LEFT JOIN annotation_users u ON A.user_id = u.id
-WHERE A.stage_id IN ${STAGE_IDS_SQL}
-  AND A.status = 'SUBMITTED'
+WHERE A.status = 'SUBMITTED'
 `;
 
 /** Columns on annotator_judge_table / annotator CSV (shared with export pipeline). */
@@ -112,8 +107,9 @@ function escapeTs(s) {
   return s.replace(/'/g, "''");
 }
 
-function buildQuery(dateFrom, dateTo) {
-  let q = BASE_QUERY.trim();
+function buildQuery(dateFrom, dateTo, stageIds) {
+  const idsSql = stageIds.map((s) => `'${s.replace(/'/g, "''")}'`).join(', ');
+  let q = `${BASE_QUERY_PREFIX.trim()}\n  AND A.stage_id IN (${idsSql})`;
   if (dateFrom) q += `\n  AND A.created_at >= '${escapeTs(dateFrom)}'::timestamptz`;
   if (dateTo) q += `\n  AND A.created_at <= '${escapeTs(dateTo)}'::timestamptz`;
   q += '\nORDER BY A.updated_at DESC;';
@@ -233,7 +229,8 @@ WHERE i.subtask_id IS NOT NULL
  * @returns {Promise<{ soul_rows_fetched: number, skipped_existing: number, rows_inserted: number }>}
  */
 export async function runJudgeIngest(dateFrom, dateTo) {
-  const query = buildQuery(dateFrom, dateTo);
+  const stageIds = await getRequiredStageIds(STAGE_ID_PURPOSE.ANNOTATOR_JUDGE);
+  const query = buildQuery(dateFrom, dateTo, stageIds);
   const apiRows = await fetchApiRows(query);
   if (!apiRows.length) {
     return { soul_rows_fetched: 0, skipped_existing: 0, rows_inserted: 0 };

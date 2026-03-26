@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-/** @type {Map<string, { scriptDir: string, sec2In: string, sec3In: string, sec2Out: string, sec3Out: string, summary: string | null, expires: number }>} */
+/** @type {Map<string, { scriptDir: string, sec2In: string, sec3In: string, sec2Out: string, sec3Out: string, evalSummary: string | null, summary: string | null, expires: number }>} */
 const store = new Map();
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -13,9 +13,27 @@ function isUnderDir(filePath, dir) {
   return r === d || r.startsWith(d + path.sep);
 }
 
+async function readCsvUnderScriptDir(filePath, scriptDir) {
+  if (!isUnderDir(filePath, scriptDir)) {
+    return { status: 403, error: 'Forbidden path.' };
+  }
+  try {
+    const body = await readFile(path.resolve(filePath));
+    const base = path.basename(filePath);
+    return {
+      status: 200,
+      contentType: 'text/csv; charset=utf-8',
+      disposition: `attachment; filename="${base}"`,
+      body,
+    };
+  } catch {
+    return { status: 404, error: 'File not found.' };
+  }
+}
+
 /**
  * @param {string} scriptsDir - Absolute path to backend/scripts (for path validation)
- * @param {{ sec2In: string, sec3In: string, sec2Out: string, sec3Out: string, summary: string | null }} files
+ * @param {{ sec2In: string, sec3In: string, sec2Out: string, sec3Out: string, evalSummary?: string | null, summary: string | null }} files
  * @param {number} [ttlMs]
  * @returns {string} token
  */
@@ -28,6 +46,7 @@ export function registerPipelineExports(scriptsDir, files, ttlMs = DEFAULT_TTL_M
     sec3In: files.sec3In,
     sec2Out: files.sec2Out,
     sec3Out: files.sec3Out,
+    evalSummary: files.evalSummary ?? null,
     summary: files.summary,
     expires,
   });
@@ -37,7 +56,7 @@ export function registerPipelineExports(scriptsDir, files, ttlMs = DEFAULT_TTL_M
 
 /**
  * @param {string} token
- * @param {string} which - section2-input | section3-input | section2-output | section3-output | summary
+ * @param {string} which - section2-input | section3-input | section2-output | section3-output | eval-summary | summary
  * @returns {Promise<{ status: number, error?: string, contentType?: string, disposition?: string, body?: Buffer }>}
  */
 export async function serveExport(token, which) {
@@ -56,6 +75,11 @@ export async function serveExport(token, which) {
     };
   }
 
+  if (which === 'eval-summary') {
+    if (e.evalSummary == null) return { status: 404, error: 'No eval summary CSV for this export.' };
+    return readCsvUnderScriptDir(e.evalSummary, e.scriptDir);
+  }
+
   const map = {
     'section2-input': e.sec2In,
     'section3-input': e.sec3In,
@@ -65,20 +89,5 @@ export async function serveExport(token, which) {
   const filePath = map[which];
   if (!filePath) return { status: 404, error: 'Unknown file.' };
 
-  if (!isUnderDir(filePath, e.scriptDir)) {
-    return { status: 403, error: 'Forbidden path.' };
-  }
-
-  try {
-    const body = await readFile(path.resolve(filePath));
-    const base = path.basename(filePath);
-    return {
-      status: 200,
-      contentType: 'text/csv; charset=utf-8',
-      disposition: `attachment; filename="${base}"`,
-      body,
-    };
-  } catch {
-    return { status: 404, error: 'File not found.' };
-  }
+  return readCsvUnderScriptDir(filePath, e.scriptDir);
 }

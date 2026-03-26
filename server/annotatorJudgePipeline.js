@@ -101,7 +101,7 @@ export async function* runAnnotatorJudgePipelineEvents(opts, send = () => {}) {
     yield { type: 'log', message: 'Skipping judge ingest (using existing annotator_judge_table rows).' };
   }
 
-  yield { type: 'log', message: 'Loading rows (annotator ∩ golden-mock-tasking on subtask_id)…' };
+  yield { type: 'log', message: 'Loading rows (annotator ∩ golden_datasets on subtask_id)…' };
   let annRows;
   try {
     annRows = await fetchAnnotatorRowsWithGold(dateFrom, dateTo, maxRows);
@@ -129,7 +129,7 @@ export async function* runAnnotatorJudgePipelineEvents(opts, send = () => {}) {
     yield {
       type: 'error',
       message:
-        'No annotator rows with a matching gold row (trimmed subtask_id) in this date range. Align Soul uniqueId with golden-mock-tasking.subtask_id.',
+        'No annotator rows with a matching gold row (trimmed subtask_id) in this date range. Align Soul uniqueId with golden_datasets.subtask_id.',
     };
     return;
   }

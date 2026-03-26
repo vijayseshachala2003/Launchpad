@@ -68,12 +68,12 @@ Runs on the host; loads **`backend/.env`**. Serves **`frontend/dist`** when buil
 | `index.js` | Express: static files, CORS, **`POST /api/pipeline`**, **`POST /api/judge-ingest`**, **`POST /api/annotator-judge-pipeline`**, export GETs |
 | `pipeline.js` | Launchpad: ingest → rows → Section 2/3 judges → Supabase (**exports `runJudgeStream`**) |
 | `annotatorJudgePipeline.js` | Annotator path: ingest → join gold → **`batch_evaluate.py`** → optional downloads |
-| `annotatorJudgeDb.js` | Postgres: annotator rows ∩ **`golden-mock-tasking`** |
+| `annotatorJudgeDb.js` | Postgres: annotator rows ∩ **`golden_datasets`** |
 | `annotatorJudgeExportRegistry.js` | Short-lived tokens for annotator pipeline artifacts |
 | `ingest.js` | Soul → **`new_evaluation_table`** (Assessment Evaluation) |
 | `ingestJudge.js` | Soul → **`annotator_judge_table`** (annotator-judge stages) |
 | `sql/annotator_judge_table.sql` | DDL for **`annotator_judge_table`** |
-| `sql/golden-mock-tasking.sql` | DDL for gold labels table **`golden-mock-tasking`** |
+| `sql/golden_mock_metadata.sql` | Metadata migration for gold labels table **`golden_datasets`** |
 | `loadGoldenMockTasking.js` | **`npm run load-golden-mock`** — CSV → Supabase gold table |
 | `db.js` | Postgres (Supabase) client + range queries |
 | `datetimeTz.js` | Timezone / UTC helpers |
@@ -122,7 +122,7 @@ Browser (frontend/)  →  HTTP  →  server/ (Node)
                               spawn Python: backend/scripts/*.py
 ```
 
-- **`annotator-judge/`** — Python **`batch_evaluate.py`** is spawned by **`POST /api/annotator-judge-pipeline`** (after Soul ingest + join to **`golden-mock-tasking`**). Static mappings: **`backend/annotator-judge/config/ae_v1_mappings.json`**. Gold CSV load: **`cd server && npm run load-golden-mock`**. M2/M3 need **`GOOGLE_API_KEY`** (or Together) in **`backend/.env`**. Prompt/ResponseA/B are not in the current gold CSV; M2/M3 see empty context unless you extend gold or Soul export.
+- **`annotator-judge/`** — Python **`batch_evaluate.py`** is spawned by **`POST /api/annotator-judge-pipeline`** (after Soul ingest + join to **`golden_datasets`**). Static mappings: **`backend/annotator-judge/config/ae_v1_mappings.json`**. Gold CSV load: **`cd server && npm run load-golden-mock`**. M2/M3 need **`GOOGLE_API_KEY`** (or Together) in **`backend/.env`**. Prompt/ResponseA/B are not in the current gold CSV; M2/M3 see empty context unless you extend gold or Soul export.
 
 ### Pipeline steps
 

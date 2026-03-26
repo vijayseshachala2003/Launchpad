@@ -6,26 +6,19 @@
 import fetch from 'node-fetch';
 import pg from 'pg';
 import { getPostgresConfig } from './db.js';
+import { getRequiredStageIds, STAGE_ID_PURPOSE } from './stageIdsDb.js';
 
 const { Client } = pg;
 
 const API_ENDPOINT = 'https://reporting.soulhq.ai/read-query/execute';
 const SOURCE = 'Node ETL';
 
-const STAGE_IDS_SQL = `(
-  'stc_260218173538143LSI2M',
-  'stc_26020219454705910Z9Z',
-  'stc_260226150737582HP0J1',
-  'stc_2603051253374341APCA',
-  'stc_260307170924816MJKG9',
-  'stc_2603111315195612L5NS'
-)`;
-
-const BASE_QUERY = `
+const BASE_QUERY_PREFIX = `
 SELECT
   A.created_at,
   u.email,
   A.previous_data ->> 'uniqueId' AS "uniqueId",
+  -- section 1
   A.previous_data ->> 'initialValue_passage' AS "initialValue_passage",
   A.previous_data ->> 'initialValue_question_1' AS "initialValue_question_1",
   A.response_data ->> 'ans_1' AS ans_1,
@@ -37,6 +30,7 @@ SELECT
   A.response_data ->> 'ans_4' AS ans_4,
   A.previous_data ->> 'initialValue_question_5' AS "initialValue_question_5",
   A.response_data ->> 'ans_5' AS ans_5,
+  -- section 2
   A.previous_data ->> 'initialValue_prompt' AS "initialValue_prompt",
   A.previous_data ->> 'initialValue_ai_response' AS "initialValue_ai_response",
   A.previous_data ->> 'section_2_instruction' AS section_2_instruction,
@@ -46,6 +40,7 @@ SELECT
   A.response_data ->> 'task_2_response' AS task_2_response,
   A.previous_data ->> 'initialValue_task_3' AS task_3,
   A.response_data ->> 'task_3_response' AS task_3_response,
+  -- section 3
   A.previous_data ->> 'initialValue_scenario' AS "initialValue_scenario",
   A.previous_data ->> 'initialValue_sec_3_qn' AS "initialValue_sec_3_qn",
   A.previous_data ->> 'section_3_instruction' AS section_3_instruction,
@@ -53,7 +48,6 @@ SELECT
 FROM annotation_task_response_data A
 LEFT JOIN annotation_users u ON A.user_id = u.id
 WHERE A.status = 'SUBMITTED'
-  AND A.stage_id IN ${STAGE_IDS_SQL}
 `;
 
 function escapeTs(s) {
@@ -61,8 +55,9 @@ function escapeTs(s) {
   return s.replace(/'/g, "''");
 }
 
-function buildQuery(dateFrom, dateTo) {
-  let q = BASE_QUERY.trim();
+function buildQuery(dateFrom, dateTo, stageIds) {
+  const idsSql = stageIds.map((s) => `'${s.replace(/'/g, "''")}'`).join(', ');
+  let q = `${BASE_QUERY_PREFIX.trim()}\n  AND A.stage_id IN (${idsSql})`;
   if (dateFrom) q += `\n  AND A.created_at >= '${escapeTs(dateFrom)}'::timestamptz`;
   if (dateTo) q += `\n  AND A.created_at <= '${escapeTs(dateTo)}'::timestamptz`;
   q += '\nORDER BY A.created_at;';
@@ -170,7 +165,8 @@ WHERE NOT EXISTS (
  * @returns {Promise<{ soul_rows_fetched: number, skipped_existing: number, rows_inserted: number }>}
  */
 export async function runIngest(dateFrom, dateTo) {
-  const query = buildQuery(dateFrom, dateTo);
+  const stageIds = await getRequiredStageIds(STAGE_ID_PURPOSE.LAUNCHPAD_EVAL);
+  const query = buildQuery(dateFrom, dateTo, stageIds);
   const apiRows = await fetchApiRows(query);
   if (!apiRows.length) {
     return { soul_rows_fetched: 0, skipped_existing: 0, rows_inserted: 0 };

@@ -10,12 +10,16 @@ function annotatorTableName() {
 
 /** Quoted Postgres identifier for golden table (hyphenated name). */
 function goldenTableRawName() {
-  return (process.env.GOLDEN_MOCK_TABLE || 'golden-mock-tasking').trim().replace(/^"|"$/g, '');
+  return (process.env.GOLDEN_MOCK_TABLE || 'golden_datasets').trim().replace(/^"|"$/g, '');
 }
 
 function goldenTableSql() {
   const raw = goldenTableRawName();
   return `"${raw.replace(/"/g, '""')}"`;
+}
+
+function goldenPurpose() {
+  return (process.env.GOLDEN_PURPOSE || 'annotator_judge').trim() || 'annotator_judge';
 }
 
 export const GOLDEN_CSV_COLUMNS = [
@@ -85,6 +89,7 @@ export const GOLDEN_CSV_COLUMNS = [
 export async function fetchAnnotatorRowsWithGold(dateFromUtc, dateToUtc, maxRows) {
   const ann = annotatorTableName();
   const gold = goldenTableSql();
+  const purpose = goldenPurpose();
   const aCols = ANNOTATOR_JUDGE_CSV_COLUMNS.map((c) => `a.${c}`).join(', ');
 
   let sql = `
@@ -92,11 +97,13 @@ export async function fetchAnnotatorRowsWithGold(dateFromUtc, dateToUtc, maxRows
     FROM ${ann} a
     INNER JOIN ${gold} g ON BTRIM(a.subtask_id) = BTRIM(g.subtask_id)
     WHERE a.created_at >= $1::timestamptz AND a.created_at <= $2::timestamptz
+      AND COALESCE(g.is_active, true) = true
+      AND COALESCE(g.purpose, 'annotator_judge') = $3
     ORDER BY a.updated_at DESC NULLS LAST
   `;
-  const params = [dateFromUtc, dateToUtc];
+  const params = [dateFromUtc, dateToUtc, purpose];
   if (maxRows > 0) {
-    sql += ` LIMIT $3`;
+    sql += ` LIMIT $4`;
     params.push(maxRows);
   }
 
@@ -118,12 +125,17 @@ export async function fetchGoldenRowsForSubtaskIds(subtaskIds) {
   if (!uniq.length) return [];
 
   const gold = goldenTableSql();
+  const purpose = goldenPurpose();
   const client = new Client(getPostgresConfig());
   await client.connect();
   try {
     const res = await client.query(
-      `SELECT * FROM ${gold} g WHERE BTRIM(g.subtask_id) = ANY($1::text[])`,
-      [uniq]
+      `SELECT *
+       FROM ${gold} g
+       WHERE BTRIM(g.subtask_id) = ANY($1::text[])
+         AND COALESCE(g.is_active, true) = true
+         AND COALESCE(g.purpose, 'annotator_judge') = $2`,
+      [uniq, purpose]
     );
     return res.rows;
   } finally {
@@ -146,6 +158,7 @@ export async function verifyAnnotatorJudgeDbConnection() {
 
   const ann = annotatorTableName();
   const gold = goldenTableSql();
+  const purpose = goldenPurpose();
   const client = new Client(getPostgresConfig());
 
   try {
@@ -157,6 +170,7 @@ export async function verifyAnnotatorJudgeDbConnection() {
   const details = {
     annotator_table: ann,
     golden_table: goldenTableRawName(),
+    golden_purpose: purpose,
     annotator_judge_row_count: null,
     golden_mock_row_count: null,
     joinable_row_count: null,
@@ -175,7 +189,13 @@ export async function verifyAnnotatorJudgeDbConnection() {
   }
 
   try {
-    const r2 = await client.query(`SELECT COUNT(*)::bigint AS c FROM ${gold}`);
+    const r2 = await client.query(
+      `SELECT COUNT(*)::bigint AS c
+       FROM ${gold} g
+       WHERE COALESCE(g.is_active, true) = true
+         AND COALESCE(g.purpose, 'annotator_judge') = $1`,
+      [purpose]
+    );
     details.golden_mock_row_count = Number(r2.rows[0].c);
   } catch (e) {
     await client.end();
@@ -191,7 +211,9 @@ export async function verifyAnnotatorJudgeDbConnection() {
       SELECT COUNT(*)::bigint AS c
       FROM ${ann} a
       INNER JOIN ${gold} g ON BTRIM(a.subtask_id) = BTRIM(g.subtask_id)
-    `);
+      WHERE COALESCE(g.is_active, true) = true
+        AND COALESCE(g.purpose, 'annotator_judge') = $1
+    `, [purpose]);
     details.joinable_row_count = Number(r3.rows[0].c);
   } catch (e) {
     await client.end();
